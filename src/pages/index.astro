@@ -184,7 +184,7 @@ const faqs = [
 			</header>
 
 			<main>
-				<section class="border-b px-7 py-16 sm:py-20">
+				<section class="border-b p-6 sm:p-16">
 					<h1 class="max-w-[600px] text-3xl font-semibold tracking-tight sm:text-4xl">
 						Run useful AI agents in the channels where work already happens.
 					</h1>
@@ -201,9 +201,9 @@ const faqs = [
 					</div>
 				</section>
 
-				<section class="border-b">
+				<section class="border-b p-6 sm:p-16">
 					<div class="tabs w-full" id="landing-examples">
-						<nav role="tablist" aria-orientation="horizontal" class="mx-7 mt-5">
+						<nav role="tablist" aria-orientation="horizontal">
 							{highlightedExamples.map((example, index) => (
 								<button
 									type="button"
@@ -226,13 +226,13 @@ const faqs = [
 								aria-selected={index === 0 ? "true" : "false"}
 								hidden={index !== 0}
 							>
-								<div class="landing-code scrollbar overflow-x-auto px-7 py-7 text-[13px]" set:html={example.html} />
+								<div class="landing-code scrollbar overflow-x-auto p-4 text-[13px] sm:p-7" set:html={example.html} />
 							</div>
 						))}
 					</div>
 				</section>
 
-				<section class="border-b px-7 py-14">
+				<section class="border-b p-6 sm:p-16">
 					<h2 class="text-lg font-semibold">What is heypi?</h2>
 					<p class="mt-4 max-w-[580px] leading-7 text-muted-foreground">
 						heypi brings local, capability-first agents to team chat. You configure one TypeScript app, connect it to Slack, Discord, Telegram, or webhooks, and give the agent scoped tools it can compose instead of forcing every request through a fixed workflow.
@@ -248,7 +248,7 @@ const faqs = [
 					<a class="btn-outline mt-8" href="/docs">Read docs →</a>
 				</section>
 
-				<section class="border-b px-7 py-14">
+				<section class="border-b p-6 sm:p-16">
 					<h2 class="text-lg font-semibold">FAQ</h2>
 					<section class="accordion mt-6 [&_a]:underline [&_a]:underline-offset-2 [&_a]:decoration-muted-foreground/50 [&_a]:transition-all [&_a]:hover:decoration-foreground/50">
 						{faqs.map((faq) => (
