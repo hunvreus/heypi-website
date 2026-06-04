@@ -2,9 +2,11 @@
 import Site from "@/layouts/Site.astro";
 import Logo from "@/components/Logo.astro";
 import { type DocsManifest, type DocsNavItem, type DocsPage, type Heading, isDocsPage, isDocsSubmenu, navPages } from "@/lib/docs";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Info, Moon, PanelLeft, Rocket, Search, Sun, TableOfContents, Zap } from "lucide-static";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Info, PanelLeft, Rocket, Search, TableOfContents, Zap } from "lucide-static";
 import ClaudeLogo from "@/icons/logos/claude.svg?raw";
 import CursorLogo from "@/icons/logos/cursor.svg?raw";
+import DiscordLogo from "@/icons/logos/discord.svg?raw";
+import GitHubLogo from "@/icons/logos/github.svg?raw";
 import MarkdownLogo from "@/icons/logos/markdown.svg?raw";
 import OpenAILogo from "@/icons/logos/openai.svg?raw";
 
@@ -128,7 +130,7 @@ const commandGroups = manifest.groups
 		<aside id="sidebar" class="sidebar" data-side="left" aria-hidden="false">
 			<nav aria-label="Documentation navigation">
 				<header>
-					<a href="/" hx-boost="false" class="inline-flex px-2 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="heypi docs">
+					<a href="/" hx-boost="false" class="inline-flex h-full items-center px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="heypi docs">
 						<Logo />
 					</a>
 				</header>
@@ -207,22 +209,30 @@ const commandGroups = manifest.groups
 				>
 					<Fragment set:html={Search} />
 				</button>
-				<button
-					type="button"
-					aria-label="Toggle dark mode"
-					data-tooltip="Toggle dark mode"
+				<a
+					href="https://github.com/hunvreus/heypi"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="GitHub"
+					data-tooltip="GitHub"
 					data-side="bottom"
 					data-align="end"
-					onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
 					class="btn-sm-icon-ghost"
 				>
-					<span class="hidden dark:block">
-						<Fragment set:html={Sun} />
-					</span>
-					<span class="block dark:hidden">
-						<Fragment set:html={Moon} />
-					</span>
-				</button>
+					<Fragment set:html={GitHubLogo} />
+				</a>
+				<a
+					href="https://discord.com/channels/1508147316710703215/1511161118385635429"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Discord"
+					data-tooltip="Discord"
+					data-side="bottom"
+					data-align="end"
+					class="btn-sm-icon-ghost"
+				>
+					<Fragment set:html={DiscordLogo} />
+				</a>
 			</nav>
 		</header>
 

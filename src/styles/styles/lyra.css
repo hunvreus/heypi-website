@@ -1112,6 +1112,10 @@
     @apply gap-2 p-2;
   }
 
+  .sidebar nav > header {
+    @apply border-sidebar-border h-14 border-b p-0;
+  }
+
   .sidebar nav > section {
     @apply gap-0;
   }

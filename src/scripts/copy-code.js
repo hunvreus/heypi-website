@@ -21,6 +21,11 @@
 	};
 
 	const initCopyCode = (pre) => {
+		if (pre.dataset.copyCode === "false" || pre.closest("[data-copy-code='false']")) {
+			pre.dataset.copyCodeInitialized = "true";
+			return;
+		}
+
 		const code = pre.querySelector(":scope > code");
 		if (!code) return;
 
