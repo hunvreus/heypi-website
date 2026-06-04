@@ -9,8 +9,9 @@
 		"htmx": "mkdir -p public/assets && cp node_modules/htmx.org/dist/htmx.min.js public/assets/htmx.min.js",
 		"copy-code": "mkdir -p public/assets && cp src/scripts/copy-code.js public/assets/copy-code.js",
 		"styles": "tailwindcss -i ./src/styles.css -o ./public/assets/styles.css --minify",
-		"dev": "node scripts/sync-docs.mjs && pnpm run basecoat && pnpm run fonts && pnpm run htmx && pnpm run copy-code && pnpm run styles && astro dev",
-		"build": "rm -rf dist && node scripts/sync-docs.mjs && pnpm run basecoat && pnpm run fonts && pnpm run htmx && pnpm run copy-code && pnpm run styles && astro build",
+		"assets": "pnpm run basecoat && pnpm run fonts && pnpm run htmx && pnpm run copy-code && pnpm run styles",
+		"dev": "pnpm run assets && astro dev",
+		"build": "rm -rf dist && pnpm run assets && astro build",
 		"preview": "astro preview",
 		"sync:docs": "node scripts/sync-docs.mjs"
 	},

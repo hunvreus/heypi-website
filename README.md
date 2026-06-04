@@ -2,35 +2,37 @@
 
 Static Astro site for `heypi.dev`.
 
-Docs are sourced from the heypi package at build time:
+Docs are committed in `docs/`. Pull a fresh copy from the heypi package manually when needed:
 
 ```bash
 pnpm install
+pnpm sync:docs
+```
+
+Then check the site locally:
+
+```bash
 pnpm dev
 ```
 
-By default the sync script uses `../biots` when it exists. In CI, set `HEYPI_DOCS_REPO` and `HEYPI_DOCS_REF`, or rely on the defaults:
+By default the sync script uses `../biots` when it exists. For a local checkout elsewhere:
 
 ```bash
-HEYPI_DOCS_REPO=https://github.com/hunvreus/heypi.git HEYPI_DOCS_REF=main pnpm build
-```
-
-For a local checkout elsewhere:
-
-```bash
-HEYPI_DOCS_PATH=/path/to/heypi pnpm build
+HEYPI_DOCS_PATH=/path/to/heypi pnpm sync:docs
 ```
 
 ## Rebuilding docs
 
-The build always runs `scripts/sync-docs.mjs` before Astro. That means:
+Cloudflare builds only the committed site. It does not import docs from the heypi repo.
 
-- Local development uses `../biots` automatically when that checkout exists.
-- CI or Cloudflare builds clone `https://github.com/hunvreus/heypi.git` by default and import `packages/heypi/docs`.
-- To pin a docs revision, set `HEYPI_DOCS_REF`.
-- To import docs manually and commit the generated `docs/` folder, run `pnpm sync:docs`.
+Manual docs update flow:
 
-Automatic rebuilds from heypi doc changes still need an external trigger. The usual options are:
+```bash
+pnpm sync:docs
+pnpm dev
+git add docs
+git commit -m "Update heypi docs"
+git push
+```
 
-- Add a GitHub Action in `hunvreus/heypi` that triggers a deploy/rebuild for this site after docs changes.
-- Add a manual release step: run `pnpm sync:docs`, commit the changed `docs/` files here, then push.
+If site code changed too, use `git add .` before committing.
