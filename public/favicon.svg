@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+	<rect width="256" height="256" fill="#1c1917" />
+	<path
+		d="M34.2627 34.2861V205.714H68.5264V137.143H102.789V205.714H137.053V102.857H68.5264V34.2861H34.2627Z"
+		fill="#fafaf9"
+		transform="translate(9.7373 8.7139)"
+	/>
+	<path
+		d="M582.474 171.429V205.714H616.737V171.429H582.474ZM582.474 137.143H616.737V34.2861H582.474V137.143Z"
+		fill="#fafaf9"
+		transform="translate(-411.474 8.7139)"
+	/>
+</svg>
