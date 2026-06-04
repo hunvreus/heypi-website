@@ -167,7 +167,7 @@
 }
 
 .prose code:not(pre code) {
-	@apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-[13px];
+	@apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-sm;
 }
 
 .prose :where(h2, h3, h4) code:not(pre code) {
