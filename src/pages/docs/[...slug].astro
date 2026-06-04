@@ -1,0 +1,19 @@
+---
+import Docs from "@/layouts/Docs.astro";
+import { getManifest, getPages, renderDoc } from "@/lib/docs";
+
+export function getStaticPaths() {
+	return getPages().map((page) => ({
+		params: { slug: page.slug || undefined },
+		props: { page },
+	}));
+}
+
+const manifest = getManifest();
+const { page } = Astro.props;
+const doc = await renderDoc(page);
+---
+
+<Docs title={`${doc.page.title} · heypi docs`} description={manifest.description} manifest={manifest} page={page} headings={doc.headings}>
+	<Fragment set:html={doc.html} />
+</Docs>

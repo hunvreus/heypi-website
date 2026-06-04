@@ -1,0 +1,330 @@
+---
+import Site from "@/layouts/Site.astro";
+import Logo from "@/components/Logo.astro";
+import checkIcon from "lucide-static/icons/check.svg?raw";
+import copyIcon from "lucide-static/icons/copy.svg?raw";
+import plusIcon from "lucide-static/icons/plus.svg?raw";
+import { codeToHtml } from "shiki";
+
+const prompt = "Read https://heypi.dev/start.md then help create my first agent.";
+
+const examples = [
+	{
+		id: "slack-agent",
+		label: "Slack agent",
+		code: `// Minimal Slack agent with durable state and a scoped runtime workspace.
+import { agentFrom, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
+
+const app = createHeypi({
+  state: { root: "./state" },
+  adapters: [slack({
+    botToken: process.env.SLACK_BOT_TOKEN!,
+    appToken: process.env.SLACK_APP_TOKEN!,
+  })],
+  agent: agentFrom("./agent", { model: "openai/gpt-5-mini" }),
+  runtime: { root: workspace("./workspace") },
+});
+
+await runHeypi(app);`,
+	},
+	{
+		id: "approval-rules",
+		label: "Approval rules",
+		code: `// Require approval only when a command crosses your policy boundary.
+import { agentFrom, coreTools, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
+
+const app = createHeypi({
+  state: { root: "./state" },
+  adapters: [slack({
+    botToken: process.env.SLACK_BOT_TOKEN!,
+    appToken: process.env.SLACK_APP_TOKEN!,
+  })],
+  agent: agentFrom("./agent", { model: "openai/gpt-5-mini" }),
+  runtime: { root: workspace("./workspace") },
+  tools: coreTools({
+    bash: {
+      confirm: ({ command }) =>
+        command.includes("deploy")
+          ? { reason: "Deploys require approval." }
+          : false,
+    },
+  }),
+  approvals: { approvers: ["slack:T123:U456"] },
+});
+
+await runHeypi(app);`,
+	},
+	{
+		id: "docker-runtime",
+		label: "Docker runtime",
+		code: `// Run core command and file tools inside a warm Docker runtime.
+import { agentFrom, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
+import { dockerRuntime } from "@hunvreus/heypi-runtime-docker";
+
+const app = createHeypi({
+  state: { root: "./state" },
+  adapters: [slack({
+    botToken: process.env.SLACK_BOT_TOKEN!,
+    appToken: process.env.SLACK_APP_TOKEN!,
+  })],
+  agent: agentFrom("./agent", { model: "openai/gpt-5-mini" }),
+  runtime: {
+    root: workspace("./workspace"),
+    provider: dockerRuntime({
+      image: "buildpack-deps:bookworm-curl",
+      idleMs: 10 * 60 * 1000,
+    }),
+  },
+});
+
+await runHeypi(app);`,
+	},
+];
+
+const highlightedExamples = await Promise.all(
+	examples.map(async (example) => ({
+		...example,
+		html: await codeToHtml(example.code, {
+			lang: "ts",
+			themes: {
+				light: "github-light-default",
+				dark: "github-dark-default",
+			},
+			defaultColor: false,
+			colorReplacements: {
+				"github-dark-default": {
+					"#24292e": "oklch(0.145 0 0)",
+				},
+			},
+		}),
+	})),
+);
+
+const features = [
+	["Adapters", "Run agents in Slack, Discord, Telegram, or webhook workflows."],
+	["Runtime tools", "Expose command, file, search, and attachment tools through a scoped runtime."],
+	["Runtime providers", "Use built-in just-bash or plug in Docker, Gondolin, or a custom provider."],
+	["Approvals", "Require human approval before sensitive tools continue."],
+	["Audit trail", "Persist turns, calls, approvals, results, and failures in SQLite."],
+	["Scoped memory", "Keep durable notes scoped by channel, user, thread, adapter, or agent."],
+	["Skills", "Let agents manage scoped runbooks and reusable instructions."],
+	["Secret requests", "Collect secrets through encrypted handoff instead of plain chat."],
+	["Scheduling", "Run cron jobs and heartbeat follow-ups against explicit targets."],
+	["Admin UI", "Inspect chats, calls, approvals, memory, jobs, runs, and configuration."],
+	["Attachments", "Let agents receive files and attach generated files back to chat."],
+	["Custom tools", "Add trusted TypeScript tools for your app, data, APIs, and workflows."],
+];
+
+const faqs = [
+	{
+		question: "What is heypi?",
+		answer: 'heypi is a TypeScript framework for running <a href="https://pi.dev">Pi</a> agents in Slack, Discord, Telegram, and webhook workflows. It gives the agent chat adapters, scoped runtime tools, durable state, approvals, memory, skills, secrets, jobs, and an admin UI.',
+	},
+	{
+		question: "How do I use heypi?",
+		answer: 'Create a small TypeScript app with <code>createHeypi()</code>, add an adapter, load a Pi agent with <code>agentFrom()</code>, choose a runtime workspace, and run it as a long-running Node.js service. Start with the <a href="/docs/quickstart">quickstart</a>.',
+	},
+	{
+		question: "What can I connect it to?",
+		answer: 'The core package supports <a href="/docs/adapters/slack">Slack</a>, <a href="/docs/adapters/discord">Discord</a>, <a href="/docs/adapters/telegram">Telegram</a>, and <a href="/docs/adapters/webhook">webhooks</a>. You can also write custom adapters through the <a href="/docs/guides/integrations">integration APIs</a>.',
+	},
+	{
+		question: "Which models can I use?",
+		answer: 'heypi delegates model calls to Pi. Configure the model in <a href="/docs/configuration/agent">agent configuration</a> and provide provider credentials, such as <code>OPENAI_API_KEY</code>, through the Node process environment.',
+	},
+	{
+		question: "Do I need Docker or a VM?",
+		answer: 'No. The default runtime is just-bash. Use <a href="/docs/configuration/runtime">Docker or Gondolin runtime providers</a> when the agent needs a real container or VM boundary, native binaries, package installs, or a workspace that behaves more like Linux.',
+	},
+	{
+		question: "Can agents ask before acting?",
+		answer: 'Yes. Tool calls can require approval before they continue. heypi records who requested the action, who approved it, what ran, and how it ended. See <a href="/docs/configuration/tools">tools and confirmations</a>.',
+	},
+	{
+		question: "Where does my data live?",
+		answer: 'In your deployment. heypi stores app state in SQLite under your configured <code>state.root</code>, and runtime files under your configured workspace. The public website does not host your agents, chat logs, tokens, secrets, or runtime data.',
+	},
+	{
+		question: "How much does heypi cost?",
+		answer: 'heypi is free and open source. You still pay for your own infrastructure, model provider, chat platform, and any external runtime provider you choose.',
+	},
+	{
+		question: "Is heypi open source?",
+		answer: 'Yes. The code is on <a href="https://github.com/hunvreus/heypi">GitHub</a>, packages are published on npm, and the license is in the <a href="https://github.com/hunvreus/heypi/blob/main/LICENSE">repository</a>.',
+	},
+	{
+		question: "Who built this?",
+		answer: 'heypi is built by <a href="https://ronanberder.com">Ronan Berder</a>.',
+	},
+	{
+		question: "Why did you build this?",
+		answer: 'Local, capability-first agents are useful, but team chat needs extra controls: channel adapters, scoped context, runtime boundaries, approvals, audit logs, secret handoff, and operations. heypi packages those pieces around Pi.',
+	},
+	{
+		question: "How can I help?",
+		answer: '<a href="https://github.com/hunvreus/heypi">Star the project</a>, <a href="https://github.com/hunvreus/heypi/issues">report issues</a>, <a href="https://github.com/hunvreus/heypi/pulls">send pull requests</a>, or <a href="https://github.com/sponsors/hunvreus">sponsor development</a>.',
+	},
+];
+---
+
+<Site title="heypi" description="TypeScript framework for running Pi agents in Slack, Discord, Telegram, and webhook workflows.">
+	<div class="min-h-screen bg-background text-foreground">
+		<div class="mx-auto min-h-screen w-full max-w-[960px] bg-background min-[960px]:border-x">
+			<header class="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-7">
+				<a href="/" class="flex items-center" aria-label="heypi">
+					<Logo />
+				</a>
+				<nav class="flex items-center gap-1 text-sm text-muted-foreground">
+					<a class="btn-ghost" href="/">Home</a>
+					<a class="btn-ghost" href="/docs">Docs</a>
+					<a class="btn-ghost" href="https://github.com/hunvreus/heypi" target="_blank" rel="noopener noreferrer">GitHub</a>
+					<a class="btn-ghost" href="https://discord.com/channels/1508147316710703215/1511161118385635429" target="_blank" rel="noopener noreferrer">Discord</a>
+					<a class="btn-primary" href="/docs/quickstart">Quickstart</a>
+				</nav>
+			</header>
+
+			<main>
+				<section class="border-b px-7 py-16 sm:py-20">
+					<h1 class="max-w-[600px] text-3xl font-semibold tracking-tight sm:text-4xl">
+						Run useful AI agents in the channels where work already happens.
+					</h1>
+					<p class="mt-4 max-w-[540px] leading-7 text-muted-foreground">
+						heypi wraps Pi with adapters, runtime tools, scoped memory, secrets, approvals, jobs, and an admin UI for Slack, Discord, Telegram, and webhook workflows.
+					</p>
+					<div class="mt-8 flex flex-wrap gap-3">
+						<button type="button" class="btn-primary" data-copy-prompt={prompt} onclick="copyLandingPrompt(this)">
+							<span class="[&>svg]:size-3.5" data-copy-icon set:html={copyIcon} />
+							<span class="hidden [&>svg]:size-3.5" data-check-icon set:html={checkIcon} />
+							<span data-copy-label>Copy prompt</span>
+						</button>
+						<a class="btn-outline" href="/docs">View documentation</a>
+					</div>
+				</section>
+
+				<section class="border-b">
+					<div class="tabs w-full" id="landing-examples">
+						<nav role="tablist" aria-orientation="horizontal" class="mx-7 mt-5">
+							{highlightedExamples.map((example, index) => (
+								<button
+									type="button"
+									role="tab"
+									id={`${example.id}-tab`}
+									aria-controls={`${example.id}-panel`}
+									aria-selected={index === 0 ? "true" : "false"}
+									tabindex={index === 0 ? "0" : "-1"}
+								>
+									{example.label}
+								</button>
+							))}
+						</nav>
+						{highlightedExamples.map((example, index) => (
+							<div
+								role="tabpanel"
+								id={`${example.id}-panel`}
+								aria-labelledby={`${example.id}-tab`}
+								tabindex="-1"
+								aria-selected={index === 0 ? "true" : "false"}
+								hidden={index !== 0}
+							>
+								<div class="landing-code scrollbar overflow-x-auto px-7 py-7 text-[13px]" set:html={example.html} />
+							</div>
+						))}
+					</div>
+				</section>
+
+				<section class="border-b px-7 py-14">
+					<h2 class="text-lg font-semibold">What is heypi?</h2>
+					<p class="mt-4 max-w-[580px] leading-7 text-muted-foreground">
+						heypi brings local, capability-first agents to team chat. You configure one TypeScript app, connect it to Slack, Discord, Telegram, or webhooks, and give the agent scoped tools it can compose instead of forcing every request through a fixed workflow.
+					</p>
+					<div class="mt-7 grid border-l border-t sm:grid-cols-2 md:grid-cols-3">
+						{features.map(([title, description]) => (
+							<div class="border-b border-r p-4">
+								<h3 class="font-medium">{title}</h3>
+								<p class="mt-1 text-sm leading-6 text-muted-foreground">{description}</p>
+							</div>
+						))}
+					</div>
+					<a class="btn-outline mt-8" href="/docs">Read docs →</a>
+				</section>
+
+				<section class="border-b px-7 py-14">
+					<h2 class="text-lg font-semibold">FAQ</h2>
+					<section class="accordion mt-6 [&_a]:underline [&_a]:underline-offset-2 [&_a]:decoration-muted-foreground/50 [&_a]:transition-all [&_a]:hover:decoration-foreground/50">
+						{faqs.map((faq) => (
+							<details class="group border-b last:border-b-0">
+								<summary class="w-full rounded-md outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
+									<span class="flex flex-1 items-start justify-between gap-4 py-4 text-left text-sm font-medium hover:underline">
+										{faq.question}
+										<span class="pointer-events-none shrink-0 translate-y-0.5 text-muted-foreground transition-transform duration-200 group-open:rotate-45 [&>svg]:size-4" set:html={plusIcon} />
+									</span>
+								</summary>
+								<section class="pb-4">
+									<p class="text-sm leading-7 text-muted-foreground" set:html={faq.answer} />
+								</section>
+							</details>
+						))}
+					</section>
+				</section>
+			</main>
+		</div>
+		<footer class="mx-auto max-w-[960px] px-7 py-9 text-center text-sm text-muted-foreground">
+			<p>
+				© Ronan Berder
+				<a class="ml-4 hover:text-foreground" href="https://github.com/hunvreus/heypi/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License</a>
+			</p>
+		</footer>
+	</div>
+
+	<script is:inline>
+		async function copyLandingPrompt(button) {
+			const copyIcon = button.querySelector("[data-copy-icon]");
+			const checkIcon = button.querySelector("[data-check-icon]");
+			const showCopied = () => {
+				copyIcon?.classList.add("hidden");
+				checkIcon?.classList.remove("hidden");
+			};
+			const showDefault = () => {
+				checkIcon?.classList.add("hidden");
+				copyIcon?.classList.remove("hidden");
+			};
+			try {
+				await navigator.clipboard.writeText(button.dataset.copyPrompt || "");
+				showCopied();
+			} catch (_) {
+				showDefault();
+			}
+			setTimeout(showDefault, 1500);
+		}
+	</script>
+
+	<script is:inline>
+		(() => {
+			const accordions = document.querySelectorAll(".accordion");
+			accordions.forEach((accordion) => {
+				accordion.addEventListener("click", (event) => {
+					const summary = event.target.closest("summary");
+					if (!summary) return;
+					const details = summary.closest("details");
+					if (!details) return;
+					accordion.querySelectorAll("details").forEach((detailsEl) => {
+						if (detailsEl !== details) detailsEl.removeAttribute("open");
+					});
+				});
+			});
+		})();
+	</script>
+
+	<style>
+		.landing-code :global(pre.shiki) {
+			margin: 0;
+			border-radius: 0;
+			background: transparent !important;
+		}
+
+		.landing-code :global(pre.shiki code) {
+			display: block;
+			min-width: max-content;
+		}
+	</style>
+</Site>

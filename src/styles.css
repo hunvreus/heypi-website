@@ -1,0 +1,209 @@
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
+@import "@fontsource/jetbrains-mono/latin-600.css";
+@import "@fontsource/jetbrains-mono/latin-700.css";
+@import "tailwindcss";
+@import "./styles/basecoat-lyra.css";
+@import "./styles/theme-stone.css";
+@import "./styles/basecoat-lyra-vega-size.css";
+
+@source "./**/*.{astro,ts,js}";
+
+@theme {
+	--font-sans: "JetBrains Mono", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	--default-font-family: var(--font-sans);
+	--default-mono-font-family: var(--font-mono);
+}
+
+@layer base {
+	.scrollbar {
+		scrollbar-color: var(--border) transparent;
+	}
+
+	.scrollbar::-webkit-scrollbar {
+		@apply h-4 w-4;
+	}
+
+	.scrollbar::-webkit-scrollbar-track {
+		@apply bg-transparent;
+	}
+
+	.scrollbar::-webkit-scrollbar-thumb {
+		@apply rounded-full border-4 border-transparent bg-border bg-clip-padding;
+	}
+
+	.scrollbar::-webkit-scrollbar-corner {
+		@apply bg-transparent;
+	}
+
+	.scrollbar-thin,
+	.prose pre {
+		scrollbar-width: thin;
+		scrollbar-color: var(--border) transparent;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar,
+	.prose pre::-webkit-scrollbar {
+		@apply h-2.5 w-2.5;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-track,
+	.prose pre::-webkit-scrollbar-track {
+		@apply bg-transparent;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-thumb,
+	.prose pre::-webkit-scrollbar-thumb {
+		@apply rounded-full border-2 border-transparent bg-border bg-clip-padding;
+	}
+
+	.scrollbar-thin::-webkit-scrollbar-corner,
+	.prose pre::-webkit-scrollbar-corner {
+		@apply bg-transparent;
+	}
+
+	.docs-submenu > summary {
+		@apply flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring;
+	}
+
+	.docs-submenu > summary::marker {
+		content: "";
+	}
+
+	.docs-submenu > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.docs-submenu > summary > svg {
+		@apply size-4 shrink-0;
+	}
+
+	.docs-submenu > summary::after {
+		@apply ml-auto block size-3.5 shrink-0 bg-current transition-transform;
+		content: "";
+		mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+		mask-position: center;
+		mask-repeat: no-repeat;
+		mask-size: 1rem;
+	}
+
+	.docs-submenu:not([open]) > summary::after {
+		@apply -rotate-90;
+	}
+
+	.docs-submenu > ul {
+		@apply mt-1 space-y-1 pl-4;
+	}
+
+	:where(h1, h2, h3, h4, h5, h6) {
+		color: var(--heading-foreground);
+	}
+}
+
+.prose {
+	@apply my-6 leading-7 text-foreground;
+}
+
+.prose > h1 {
+	@apply hidden;
+}
+
+.prose > h2,
+.prose > h3,
+.prose > h4 {
+	@apply my-6 scroll-m-20 font-semibold tracking-tight;
+}
+
+.prose .header-anchor {
+	color: var(--heading-foreground);
+	@apply no-underline;
+}
+
+.prose > h2 {
+	@apply mt-10 text-2xl;
+}
+
+.prose > h3 {
+	@apply mt-8 text-xl;
+}
+
+.prose > p,
+.prose > ul,
+.prose > ol,
+.prose > pre,
+.prose > blockquote,
+.prose > table,
+.prose > div:has(> table) {
+	@apply my-6;
+}
+
+.prose > *:first-child {
+	@apply mt-0;
+}
+
+.prose > *:last-child {
+	@apply mb-0;
+}
+
+.prose a {
+	@apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:decoration-foreground;
+}
+
+.prose ul {
+	@apply ml-6 list-disc;
+}
+
+.prose ol {
+	@apply ml-6 list-decimal;
+}
+
+.prose li {
+	@apply mt-2;
+}
+
+.prose code:not(pre code) {
+	@apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-[13px];
+}
+
+.prose :where(h2, h3, h4) code:not(pre code) {
+	@apply bg-transparent p-0 text-inherit;
+}
+
+.prose pre {
+	@apply relative overflow-x-auto rounded-none bg-muted text-sm;
+}
+
+.prose pre code {
+	@apply block bg-transparent p-4;
+}
+
+pre:has(> code) > .code-block-copy {
+	@apply absolute right-2.5 top-2.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 outline-none transition hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:size-4;
+}
+
+pre:has(> code):hover > .code-block-copy,
+pre:has(> code) > .code-block-copy:focus-visible {
+	@apply opacity-100;
+}
+
+.prose blockquote {
+	@apply border-l-4 pl-4 text-muted-foreground;
+}
+
+.prose .table th,
+.prose .table td {
+	@apply whitespace-normal;
+}
+
+pre.shiki {
+	background-color: var(--color-muted) !important;
+}
+
+.shiki span {
+	color: var(--shiki-light);
+}
+
+html.dark .shiki span {
+	color: var(--shiki-dark);
+}

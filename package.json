@@ -1,0 +1,35 @@
+{
+	"name": "heypi-website",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"basecoat": "mkdir -p public/assets && cp node_modules/basecoat-css/dist/js/all.min.js public/assets/basecoat.min.js",
+		"fonts": "mkdir -p public/assets/files && find node_modules/@fontsource/jetbrains-mono/files -name 'jetbrains-mono-latin-[4567]00-normal.woff*' -exec cp {} public/assets/files/ \\;",
+		"htmx": "mkdir -p public/assets && cp node_modules/htmx.org/dist/htmx.min.js public/assets/htmx.min.js",
+		"copy-code": "mkdir -p public/assets && cp src/scripts/copy-code.js public/assets/copy-code.js",
+		"styles": "tailwindcss -i ./src/styles.css -o ./public/assets/styles.css --minify",
+		"dev": "node scripts/sync-docs.mjs && pnpm run basecoat && pnpm run fonts && pnpm run htmx && pnpm run copy-code && pnpm run styles && astro dev",
+		"build": "rm -rf dist && node scripts/sync-docs.mjs && pnpm run basecoat && pnpm run fonts && pnpm run htmx && pnpm run copy-code && pnpm run styles && astro build",
+		"preview": "astro preview",
+		"sync:docs": "node scripts/sync-docs.mjs"
+	},
+	"dependencies": {
+		"@astrojs/check": "^0.9.4",
+		"@fontsource/jetbrains-mono": "^5.2.8",
+		"@tailwindcss/cli": "^4.3.0",
+		"astro": "^5.16.4",
+		"basecoat-css": "^0.3.11",
+		"github-slugger": "^2.0.0",
+		"htmx.org": "^2.0.10",
+		"lucide-static": "^1.17.0",
+		"marked": "^16.4.1",
+		"shiki": "^4.1.0",
+		"tailwindcss": "^4.3.0",
+		"typescript": "^5.9.3"
+	},
+	"devDependencies": {
+		"@types/node": "^25.9.1",
+		"wrangler": "^4.50.0"
+	}
+}
