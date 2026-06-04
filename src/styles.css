@@ -155,11 +155,22 @@
 }
 
 .prose ul {
-	@apply ml-6 list-disc;
+	@apply list-disc pl-6;
 }
 
 .prose ol {
-	@apply ml-6 list-decimal;
+	@apply list-none pl-0;
+	counter-reset: prose-ordered-list;
+}
+
+.prose ol > li {
+	@apply relative pl-7;
+	counter-increment: prose-ordered-list;
+}
+
+.prose ol > li::before {
+	@apply absolute left-0 w-5 text-right;
+	content: counter(prose-ordered-list) ".";
 }
 
 .prose li {
