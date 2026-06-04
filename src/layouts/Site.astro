@@ -4,6 +4,7 @@ interface Props {
 	description?: string;
 	image?: string;
 	imageAlt?: string;
+	robots?: string;
 	type?: "website" | "article";
 }
 
@@ -12,6 +13,7 @@ const {
 	description = "Chat agents for your team, with approvals and sandboxed tools.",
 	image = "/social.png",
 	imageAlt = "heypi",
+	robots = "index, follow",
 	type = "website",
 } = Astro.props;
 
@@ -22,6 +24,7 @@ const siteName = "heypi";
 const authorName = "Ronan Berder";
 const authorUrl = "https://ronanberder.com";
 const creatorHandle = "@hunvreus";
+const pageTitle = title === siteName ? `${siteName} | ${description}` : `${title} | ${siteName}`;
 ---
 
 <!doctype html>
@@ -32,15 +35,15 @@ const creatorHandle = "@hunvreus";
 		<meta name="color-scheme" content="dark" />
 		<meta name="description" content={description} />
 		<meta name="author" content={authorName} />
-		<meta name="robots" content="index, follow" />
+		<meta name="robots" content={robots} />
 		<meta name="theme-color" content="#0d0d0c" />
-		<title>{title}</title>
+		<title>{pageTitle}</title>
 		<link rel="canonical" href={canonicalUrl} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta property="og:site_name" content={siteName} />
 		<meta property="og:locale" content="en_US" />
 		<meta property="og:type" content={type} />
-		<meta property="og:title" content={title} />
+		<meta property="og:title" content={pageTitle} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalUrl} />
 		<meta property="og:image" content={imageUrl} />
@@ -51,7 +54,7 @@ const creatorHandle = "@hunvreus";
 		<meta property="og:image:alt" content={imageAlt} />
 		{type === "article" && <meta property="article:author" content={authorUrl} />}
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content={title} />
+		<meta name="twitter:title" content={pageTitle} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={imageUrl} />
 		<meta name="twitter:image:alt" content={imageAlt} />

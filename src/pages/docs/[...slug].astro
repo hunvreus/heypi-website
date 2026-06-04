@@ -12,8 +12,10 @@ export function getStaticPaths() {
 const manifest = getManifest();
 const { page } = Astro.props;
 const doc = await renderDoc(page);
+const description =
+	doc.page.slug === "" ? manifest.description : `${doc.page.title} documentation for heypi. ${manifest.description}`;
 ---
 
-<Docs title={`${doc.page.title} · heypi docs`} description={manifest.description} manifest={manifest} page={page} headings={doc.headings}>
+<Docs title={doc.page.title} description={description} manifest={manifest} page={page} headings={doc.headings}>
 	<Fragment set:html={doc.html} />
 </Docs>

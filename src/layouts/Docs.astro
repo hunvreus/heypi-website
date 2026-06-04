@@ -2,7 +2,7 @@
 import Site from "@/layouts/Site.astro";
 import Logo from "@/components/Logo.astro";
 import { type DocsManifest, type DocsNavItem, type DocsPage, type Heading, isDocsPage, isDocsSubmenu, navPages } from "@/lib/docs";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Info, PanelLeft, Rocket, Search, TableOfContents, Zap } from "lucide-static";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Info, PanelLeft, Rocket, Search, Zap } from "lucide-static";
 import ClaudeLogo from "@/icons/logos/claude.svg?raw";
 import CursorLogo from "@/icons/logos/cursor.svg?raw";
 import DiscordLogo from "@/icons/logos/discord.svg?raw";
@@ -85,7 +85,7 @@ const commandGroups = manifest.groups
 	.filter((group) => group.items.length > 0);
 ---
 
-<Site title={title} description={description}>
+<Site title={title} description={description} type="article">
 	<div hx-boost="true" hx-target="#content" hx-select="#content" hx-swap="outerHTML show:window:top">
 		<dialog id="command-search" class="command-dialog" aria-label="Command menu" onclick="if (event.target === this) this.close()">
 			<div class="command">
@@ -192,7 +192,7 @@ const commandGroups = manifest.groups
 					type="button"
 					aria-label="Search docs"
 					onclick="window.openDocsCommandSearch?.()"
-					class="btn-sm-secondary hidden w-40 justify-start text-muted-foreground sm:inline-flex"
+					class="btn-sm-secondary hidden w-56 justify-start text-muted-foreground md:inline-flex lg:w-72"
 				>
 					<Fragment set:html={Search} />
 					<span>Search</span>
@@ -205,7 +205,7 @@ const commandGroups = manifest.groups
 					data-side="bottom"
 					data-align="end"
 					onclick="window.openDocsCommandSearch?.()"
-					class="btn-sm-icon-ghost sm:hidden"
+					class="btn-sm-icon-ghost md:hidden"
 				>
 					<Fragment set:html={Search} />
 				</button>
@@ -214,10 +214,30 @@ const commandGroups = manifest.groups
 					target="_blank"
 					rel="noopener noreferrer"
 					aria-label="GitHub"
+					class="btn-sm-ghost hidden sm:inline-flex"
+				>
+					<Fragment set:html={GitHubLogo} />
+					<span>GitHub</span>
+				</a>
+				<a
+					href="https://discord.com/channels/1508147316710703215/1511161118385635429"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Discord"
+					class="btn-sm-ghost hidden sm:inline-flex"
+				>
+					<Fragment set:html={DiscordLogo} />
+					<span>Discord</span>
+				</a>
+				<a
+					href="https://github.com/hunvreus/heypi"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="GitHub"
 					data-tooltip="GitHub"
 					data-side="bottom"
 					data-align="end"
-					class="btn-sm-icon-ghost"
+					class="btn-sm-icon-ghost sm:hidden"
 				>
 					<Fragment set:html={GitHubLogo} />
 				</a>
@@ -229,7 +249,7 @@ const commandGroups = manifest.groups
 					data-tooltip="Discord"
 					data-side="bottom"
 					data-align="end"
-					class="btn-sm-icon-ghost"
+					class="btn-sm-icon-ghost sm:hidden"
 				>
 					<Fragment set:html={DiscordLogo} />
 				</a>
@@ -325,15 +345,12 @@ const commandGroups = manifest.groups
 			{headings.length > 0 && (
 				<aside class="hidden w-56 xl:block">
 					<div class="sticky top-20 space-y-2 text-sm">
-						<h2 class="flex items-center gap-1 font-medium">
-							<span class="[&>svg]:size-4">
-								<Fragment set:html={TableOfContents} />
-							</span>
-							On this page
+						<h2 class="text-xs font-medium text-muted-foreground">
+							ON THIS PAGE
 						</h2>
-						<nav class="space-y-2">
+						<nav class="docs-toc space-y-2">
 							{headings.map((heading) => (
-								<a class:list={["block text-muted-foreground hover:text-primary", heading.depth === 3 && "pl-3"]} href={`#${heading.id}`}>
+								<a class:list={["block text-muted-foreground transition-colors hover:text-[var(--heading-foreground)]", heading.depth === 3 && "pl-3"]} href={`#${heading.id}`} data-heading-id={heading.id}>
 									{heading.text}
 								</a>
 							))}
@@ -402,6 +419,49 @@ const commandGroups = manifest.groups
 
 		window.updateDocsSidebarCurrent = updateDocsSidebarCurrent;
 
+		let docsTocFrame = 0;
+
+		function updateDocsTocCurrent() {
+			docsTocFrame = 0;
+
+			const content = document.getElementById("content");
+			if (!content) return;
+
+			const links = Array.from(content.querySelectorAll(".docs-toc a[data-heading-id]"));
+			if (links.length === 0) return;
+
+			const headings = links
+				.map((link) => {
+					const id = link.getAttribute("data-heading-id");
+					return id ? document.getElementById(id) : null;
+				})
+				.filter(Boolean);
+			if (headings.length === 0) return;
+
+			const offset = 96;
+			let activeHeading = headings[0];
+
+			for (const heading of headings) {
+				if (heading.getBoundingClientRect().top <= offset) activeHeading = heading;
+				else break;
+			}
+
+			links.forEach((link) => {
+				if (link.getAttribute("data-heading-id") === activeHeading.id) {
+					link.setAttribute("aria-current", "true");
+				} else {
+					link.removeAttribute("aria-current");
+				}
+			});
+		}
+
+		function scheduleDocsTocCurrent() {
+			if (docsTocFrame) return;
+			docsTocFrame = window.requestAnimationFrame(updateDocsTocCurrent);
+		}
+
+		window.updateDocsTocCurrent = updateDocsTocCurrent;
+
 		if (!window.__docsCommandSearchBound) {
 			window.__docsCommandSearchBound = true;
 			window.addEventListener("keydown", (event) => {
@@ -415,9 +475,17 @@ const commandGroups = manifest.groups
 			window.addEventListener("htmx:afterSettle", updateDocsSidebarCurrent);
 			window.addEventListener("htmx:pushedIntoHistory", updateDocsSidebarCurrent);
 			window.addEventListener("htmx:replacedInHistory", updateDocsSidebarCurrent);
+			window.addEventListener("scroll", scheduleDocsTocCurrent, { passive: true });
+			window.addEventListener("hashchange", scheduleDocsTocCurrent);
+			window.addEventListener("resize", scheduleDocsTocCurrent);
+			window.addEventListener("popstate", scheduleDocsTocCurrent);
+			window.addEventListener("htmx:afterSettle", scheduleDocsTocCurrent);
+			window.addEventListener("htmx:pushedIntoHistory", scheduleDocsTocCurrent);
+			window.addEventListener("htmx:replacedInHistory", scheduleDocsTocCurrent);
 		}
 
 		updateDocsSidebarCurrent();
+		updateDocsTocCurrent();
 
 		window.copyPageMarkdown = async function copyPageMarkdown(button) {
 			const markdownUrl = button?.dataset?.mdUrl;
