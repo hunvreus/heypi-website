@@ -168,22 +168,17 @@ async function highlightToken(token: Tokens.Code): Promise<string> {
 		return await codeToHtml(token.text, {
 			lang,
 			themes: {
-				light: "github-light-default",
-				dark: "github-dark-default",
+				light: "vesper",
+				dark: "vesper",
 			},
 			defaultColor: false,
-			colorReplacements: {
-				"github-dark-default": {
-					"#24292e": "oklch(0.145 0 0)",
-				},
-			},
 		});
 	} catch {
 		return codeToHtml(token.text, {
 			lang: "text",
 			themes: {
-				light: "github-light-default",
-				dark: "github-dark-default",
+				light: "vesper",
+				dark: "vesper",
 			},
 			defaultColor: false,
 		});

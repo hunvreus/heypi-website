@@ -88,15 +88,10 @@ const highlightedExamples = await Promise.all(
     html: await codeToHtml(example.code, {
       lang: "ts",
       themes: {
-        light: "github-light-default",
-        dark: "github-dark-default",
+        light: "vesper",
+        dark: "vesper",
       },
       defaultColor: false,
-      colorReplacements: {
-        "github-dark-default": {
-          "#24292e": "oklch(0.145 0 0)",
-        },
-      },
     }),
   })),
 );
@@ -175,9 +170,9 @@ const faqs = [
       'Yes. Tool calls can require approval before they continue. heypi records who requested the action, who approved it, what ran, and how it ended. See <a href="/docs/configuration/tools">tools and confirmations</a>.',
   },
   {
-    question: "Where does my data live?",
+    question: "What does heypi store?",
     answer:
-      "In your deployment. heypi stores app state in SQLite under your configured <code>state.root</code>, and runtime files under your configured workspace. The public website does not host your agents, chat logs, tokens, secrets, or runtime data.",
+      "Your app owns the data. By default, durable state lives in SQLite under <code>state.root</code>: threads, messages, tool calls, approvals, jobs, locks, and admin metadata. Runtime files live under <code>runtime.root</code>: workspace files, generated attachments, memory, skills, and runtime-scoped secrets. <code>heypi.dev</code> is only the website and docs.",
   },
   {
     question: "How much does heypi cost?",
@@ -209,7 +204,7 @@ const faqs = [
 
 <Site
   title="heypi"
-  description="TypeScript framework for running Pi agents in Slack, Discord, Telegram, and webhook workflows."
+  description="A lightweight TypeScript framework for creating AI assistants that run in team chat with sandboxed commands and approval flows."
 >
   <div class="min-h-screen bg-background text-foreground">
     <div
@@ -399,6 +394,7 @@ const faqs = [
       const title = "Prompt copied";
       const description =
         "Paste the prompt in your coding agent (Claude Code, Codex, etc) to start building your heypi agent.";
+      const duration = 6000;
 
       try {
         document.dispatchEvent(
@@ -406,7 +402,7 @@ const faqs = [
             detail: {
               config: {
                 category: null,
-                duration: -1,
+                duration,
                 title,
                 description,
                 cancel: {
@@ -438,12 +434,14 @@ const faqs = [
         </div>
       `;
       toaster.appendChild(toast);
-      toast.querySelector("[data-toast-cancel]")?.addEventListener("click", () => {
+      const dismissToast = () => {
         toast.setAttribute("aria-hidden", "true");
         toast.addEventListener("transitionend", () => toast.remove(), {
           once: true,
         });
-      });
+      };
+      toast.querySelector("[data-toast-cancel]")?.addEventListener("click", dismissToast);
+      window.setTimeout(dismissToast, duration);
     }
 
     async function copyLandingPrompt(button: HTMLElement) {

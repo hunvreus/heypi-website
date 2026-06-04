@@ -244,7 +244,7 @@ const commandGroups = manifest.groups
 							<h1 class="mr-auto text-3xl font-semibold tracking-tight sm:text-4xl">{page.title}</h1>
 							<div class="mt-1.5 flex items-center gap-x-2">
 								<div role="group" class="button-group">
-									<button type="button" class="btn-sm-secondary" data-md-url={markdownHref} onclick="copyPageMarkdown(this)">
+									<button type="button" class="btn-sm-secondary" data-md-url={markdownHref} onclick="window.copyPageMarkdown?.(this)">
 										<span data-copy-icon>
 											<Fragment set:html={Copy} />
 										</span>
@@ -419,34 +419,33 @@ const commandGroups = manifest.groups
 
 		updateDocsSidebarCurrent();
 
-		async function copyPageMarkdown(button) {
+		window.copyPageMarkdown = async function copyPageMarkdown(button) {
 			const markdownUrl = button?.dataset?.mdUrl;
 			if (!markdownUrl) return;
 
-			const label = button.querySelector("[data-copy-label]");
-			const originalLabel = label?.textContent;
 			const copyIcon = button.querySelector("[data-copy-icon]");
 			const checkIcon = button.querySelector("[data-check-icon]");
+			const showCopied = () => {
+				copyIcon?.classList.add("hidden");
+				checkIcon?.classList.remove("hidden");
+			};
+			const showDefault = () => {
+				checkIcon?.classList.add("hidden");
+				copyIcon?.classList.remove("hidden");
+			};
 
 			try {
 				const response = await fetch(markdownUrl, { credentials: "same-origin", cache: "no-store" });
 				if (!response.ok) throw new Error("Failed to fetch markdown");
 				await writeToClipboard(await response.text());
 
-				copyIcon?.classList.add("hidden");
-				checkIcon?.classList.remove("hidden");
-				if (label) {
-					label.textContent = "Copied";
-					window.setTimeout(() => {
-						copyIcon?.classList.remove("hidden");
-						checkIcon?.classList.add("hidden");
-						label.textContent = originalLabel || "Copy page";
-					}, 1200);
-				}
+				showCopied();
+				window.setTimeout(showDefault, 1500);
 			} catch {
+				showDefault();
 				window.open(new URL(markdownUrl, window.location.href).toString(), "_blank", "noopener");
 			}
-		}
+		};
 
 		async function writeToClipboard(text) {
 			if (navigator.clipboard?.writeText && window.isSecureContext) {
@@ -454,7 +453,17 @@ const commandGroups = manifest.groups
 				return;
 			}
 
-			throw new Error("Clipboard unavailable");
+			const textarea = document.createElement("textarea");
+			textarea.value = text;
+			textarea.setAttribute("readonly", "");
+			textarea.style.position = "fixed";
+			textarea.style.top = "-9999px";
+			textarea.style.left = "-9999px";
+			document.body.appendChild(textarea);
+			textarea.select();
+			const ok = document.execCommand("copy");
+			textarea.remove();
+			if (!ok) throw new Error("Clipboard unavailable");
 		}
 		})();
 	</script>

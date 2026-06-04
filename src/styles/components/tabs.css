@@ -1,7 +1,7 @@
 /* Tabs */
 @layer components {
   .tabs {
-    @apply flex;
+    @apply flex min-w-0;
 
     &:has(> [role='tablist'][aria-orientation='horizontal']),
     &:not(:has(> [role='tablist'][aria-orientation='vertical'])) {
@@ -14,6 +14,18 @@
 
     > [role='tablist'] {
       @apply text-muted-foreground inline-flex w-fit items-center justify-center;
+
+      &[aria-orientation='horizontal'],
+      &:not([aria-orientation='vertical']) {
+        @apply max-w-full justify-start overflow-x-auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      &[aria-orientation='horizontal']::-webkit-scrollbar,
+      &:not([aria-orientation='vertical'])::-webkit-scrollbar {
+        display: none;
+      }
 
       &[aria-orientation='vertical'] {
         @apply h-fit flex-col;

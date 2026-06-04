@@ -147,7 +147,7 @@
 }
 
 .prose a {
-	@apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:decoration-foreground;
+	@apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:text-[var(--heading-foreground)] hover:decoration-foreground;
 }
 
 .prose ul {
@@ -179,12 +179,7 @@
 }
 
 pre:has(> code) > .code-block-copy {
-	@apply absolute right-2.5 top-2.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 outline-none transition hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:size-4;
-}
-
-pre:has(> code):hover > .code-block-copy,
-pre:has(> code) > .code-block-copy:focus-visible {
-	@apply opacity-100;
+	@apply absolute right-2.5 top-2.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:size-4;
 }
 
 .prose blockquote {

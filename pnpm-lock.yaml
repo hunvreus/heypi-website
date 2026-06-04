@@ -21,8 +21,8 @@ importers:
         specifier: ^5.16.4
         version: 5.18.2(@types/node@25.9.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.60.4)(typescript@5.9.3)(yaml@2.9.0)
       basecoat-css:
-        specifier: ^0.3.11
-        version: 0.3.11
+        specifier: file:vendor/basecoat-css-1.0.0.tgz
+        version: file:vendor/basecoat-css-1.0.0.tgz
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -1343,8 +1343,9 @@ packages:
   base-64@1.0.0:
     resolution: {integrity: sha512-kwDPIFCGx0NZHog36dj+tHiwP4QMzsZ3AgMViUBKI0+V5n4U0ufTCUMhnQ04diaRI8EX/QcPfql7zlhZ7j4zgg==}
 
-  basecoat-css@0.3.11:
-    resolution: {integrity: sha512-cU91Egcg9AhKJ1HswpKFItHC//FWDt1T8AlL5Yk9Fh5I2WYe+QhN3MtiVJ2vemqFF4iAM1vfbikhhjc+vkr2zA==}
+  basecoat-css@file:vendor/basecoat-css-1.0.0.tgz:
+    resolution: {integrity: sha512-yPpHKQq164QN19KI9EWdvSuA5CODAZPN81d/9eULJRSKS9rDN48CivBenrkURlzv/wuR42QkT1ocn9jJONeA1w==, tarball: file:vendor/basecoat-css-1.0.0.tgz}
+    version: 1.0.0
 
   blake3-wasm@2.1.5:
     resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
@@ -3705,7 +3706,7 @@ snapshots:
 
   base-64@1.0.0: {}
 
-  basecoat-css@0.3.11: {}
+  basecoat-css@file:vendor/basecoat-css-1.0.0.tgz: {}
 
   blake3-wasm@2.1.5: {}
 

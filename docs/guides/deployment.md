@@ -156,6 +156,8 @@ Choose the runtime provider based on what the agent is allowed to touch:
 
 Managed runtime providers keep scoped runtimes warm until idle timeout or shutdown. Plan CPU, memory, disk, and cleanup around the number of active scopes.
 
+Keep state and runtime workspace directories private to the heypi OS user on shared hosts. State contains transcripts, calls, approvals, jobs, and admin metadata. Runtime workspaces can contain generated files, attachments, and runtime-scoped secrets. A typical service setup should create these directories with `0700` permissions before starting heypi.
+
 ## Expose HTTP routes
 
 If you use Slack HTTP mode, webhooks, secrets, or the admin UI, configure the heypi HTTP listener and put it behind HTTPS.

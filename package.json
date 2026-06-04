@@ -20,7 +20,7 @@
 		"@fontsource/jetbrains-mono": "^5.2.8",
 		"@tailwindcss/cli": "^4.3.0",
 		"astro": "^5.16.4",
-		"basecoat-css": "^0.3.11",
+		"basecoat-css": "file:vendor/basecoat-css-1.0.0.tgz",
 		"github-slugger": "^2.0.0",
 		"htmx.org": "^2.0.10",
 		"lucide-static": "^1.17.0",

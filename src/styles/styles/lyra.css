@@ -276,11 +276,23 @@
 
   /* Tabs */
   .tabs {
-    @apply gap-2;
+    @apply min-w-0 gap-2;
   }
 
   .tabs > [role='tablist'] {
     @apply rounded-none p-[3px] h-8;
+  }
+
+  .tabs > [role='tablist'][aria-orientation='horizontal'],
+  .tabs > [role='tablist']:not([aria-orientation='vertical']) {
+    @apply max-w-full justify-start overflow-x-auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tabs > [role='tablist'][aria-orientation='horizontal']::-webkit-scrollbar,
+  .tabs > [role='tablist']:not([aria-orientation='vertical'])::-webkit-scrollbar {
+    display: none;
   }
 
   .tabs > [role='tablist']:not([data-variant='line']) {

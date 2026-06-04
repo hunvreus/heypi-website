@@ -2,9 +2,26 @@
 interface Props {
 	title: string;
 	description?: string;
+	image?: string;
+	imageAlt?: string;
+	type?: "website" | "article";
 }
 
-const { title, description = "Chat agents for your team, with approvals and sandboxed tools." } = Astro.props;
+const {
+	title,
+	description = "Chat agents for your team, with approvals and sandboxed tools.",
+	image = "/social.png",
+	imageAlt = "heypi",
+	type = "website",
+} = Astro.props;
+
+const site = Astro.site ?? new URL("https://heypi.dev");
+const canonicalUrl = new URL(Astro.url.pathname, site);
+const imageUrl = new URL(image, site);
+const siteName = "heypi";
+const authorName = "Ronan Berder";
+const authorUrl = "https://ronanberder.com";
+const creatorHandle = "@hunvreus";
 ---
 
 <!doctype html>
@@ -14,8 +31,31 @@ const { title, description = "Chat agents for your team, with approvals and sand
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="dark" />
 		<meta name="description" content={description} />
+		<meta name="author" content={authorName} />
+		<meta name="robots" content="index, follow" />
+		<meta name="theme-color" content="#0d0d0c" />
 		<title>{title}</title>
+		<link rel="canonical" href={canonicalUrl} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:type" content={type} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:image" content={imageUrl} />
+		<meta property="og:image:secure_url" content={imageUrl} />
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content={imageAlt} />
+		{type === "article" && <meta property="article:author" content={authorUrl} />}
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={imageUrl} />
+		<meta name="twitter:image:alt" content={imageAlt} />
+		<meta name="twitter:creator" content={creatorHandle} />
 		<link rel="stylesheet" href="/assets/styles.css" />
 		<script is:inline src="/assets/basecoat.min.js" defer></script>
 		<script is:inline src="/assets/htmx.min.js" defer></script>
