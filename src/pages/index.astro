@@ -172,7 +172,7 @@ const faqs = [
   {
     question: "What does heypi store?",
     answer:
-      "Your app owns the data. By default, durable state lives in SQLite under <code>state.root</code>: threads, messages, tool calls, approvals, jobs, locks, and admin metadata. Runtime files live under <code>runtime.root</code>: workspace files, generated attachments, memory, skills, and runtime-scoped secrets. <code>heypi.dev</code> is only the website and docs.",
+      "Your heypi app stores data on your own server. By default, chat history, tool calls, approvals, jobs, and admin metadata are saved in SQLite. Files created or received by the agent, including attachments, memory, skills, and saved secrets, live as files in the app workspace. <code>heypi.dev</code> is only the website and docs.",
   },
   {
     question: "How much does heypi cost?",
