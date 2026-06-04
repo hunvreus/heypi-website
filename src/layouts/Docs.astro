@@ -1,8 +1,28 @@
 ---
 import Site from "@/layouts/Site.astro";
 import Logo from "@/components/Logo.astro";
-import { type DocsManifest, type DocsNavItem, type DocsPage, type Heading, isDocsPage, isDocsSubmenu, navPages } from "@/lib/docs";
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Info, PanelLeft, Rocket, Search, Zap } from "lucide-static";
+import {
+  type DocsManifest,
+  type DocsNavItem,
+  type DocsPage,
+  type Heading,
+  isDocsPage,
+  isDocsSubmenu,
+  navPages,
+} from "@/lib/docs";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Copy,
+  Info,
+  PanelLeft,
+  Rocket,
+  Search,
+  Wrench,
+  Zap,
+} from "lucide-static";
 import ClaudeLogo from "@/icons/logos/claude.svg?raw";
 import CursorLogo from "@/icons/logos/cursor.svg?raw";
 import DiscordLogo from "@/icons/logos/discord.svg?raw";
@@ -11,528 +31,705 @@ import MarkdownLogo from "@/icons/logos/markdown.svg?raw";
 import OpenAILogo from "@/icons/logos/openai.svg?raw";
 
 interface Props {
-	title: string;
-	description: string;
-	manifest: DocsManifest;
-	page: DocsPage;
-	headings: Heading[];
+  title: string;
+  description: string;
+  manifest: DocsManifest;
+  page: DocsPage;
+  headings: Heading[];
 }
 
 const { title, description, manifest, page, headings } = Astro.props;
 
 const pageHref = (slug: string) => `/docs${slug ? `/${slug}` : ""}`;
 const markdownHref = `${pageHref(page.slug)}.md`;
-const absolutePageUrl = new URL(pageHref(page.slug), Astro.site ?? Astro.url).toString();
+const absolutePageUrl = new URL(
+  pageHref(page.slug),
+  Astro.site ?? Astro.url,
+).toString();
 const llmPrompt = `Read from ${absolutePageUrl} so I can ask questions about it.`;
 const encodedLlmPrompt = encodeURIComponent(llmPrompt);
 const docPages = manifest.groups.flatMap((group) => navPages(group.pages));
 const pageIndex = docPages.findIndex((item) => item.slug === page.slug);
 const previousPage = pageIndex > 0 ? docPages[pageIndex - 1] : undefined;
-const nextPage = pageIndex >= 0 && pageIndex < docPages.length - 1 ? docPages[pageIndex + 1] : undefined;
-const sidebarIcons: Record<string, string> = { info: Info, rocket: Rocket, zap: Zap };
-const itemHref = (item: DocsNavItem) => ("url" in item ? item.url : isDocsPage(item) ? pageHref(item.slug) : "#");
-const itemAttrs = (item: DocsNavItem) => {
-	const href = itemHref(item);
-	if (!("url" in item)) return {};
-	return {
-		target: href.startsWith("http") ? "_blank" : undefined,
-		rel: href.startsWith("http") ? "noopener noreferrer" : undefined,
-		...item.attrs,
-	};
+const nextPage =
+  pageIndex >= 0 && pageIndex < docPages.length - 1
+    ? docPages[pageIndex + 1]
+    : undefined;
+const sidebarIcons: Record<string, string> = {
+  info: Info,
+  rocket: Rocket,
+  wrench: Wrench,
+  zap: Zap,
 };
-const itemIsCurrent = (item: DocsNavItem) => isDocsPage(item) && item.slug === page.slug;
-const submenuIsOpen = (item: DocsNavItem): boolean => isDocsSubmenu(item) && (item.open === true || item.pages.some((child) => itemIsCurrent(child) || submenuIsOpen(child)));
+const itemHref = (item: DocsNavItem) =>
+  "url" in item ? item.url : isDocsPage(item) ? pageHref(item.slug) : "#";
+const itemAttrs = (item: DocsNavItem) => {
+  const href = itemHref(item);
+  if (!("url" in item)) return {};
+  return {
+    target: href.startsWith("http") ? "_blank" : undefined,
+    rel: href.startsWith("http") ? "noopener noreferrer" : undefined,
+    ...item.attrs,
+  };
+};
+const itemIsCurrent = (item: DocsNavItem) =>
+  isDocsPage(item) && item.slug === page.slug;
+const submenuIsOpen = (item: DocsNavItem): boolean =>
+  isDocsSubmenu(item) &&
+  (item.open === true ||
+    item.pages.some((child) => itemIsCurrent(child) || submenuIsOpen(child)));
 const iconKind = (item: DocsNavItem) => {
-	const icon = item.icon?.trim();
-	if (!icon) return "none";
-	if (icon.startsWith("<svg")) return "svg";
-	if (sidebarIcons[icon]) return "lucide";
-	return "none";
+  const icon = item.icon?.trim();
+  if (!icon) return "none";
+  if (icon.startsWith("<svg")) return "svg";
+  if (sidebarIcons[icon]) return "lucide";
+  return "none";
 };
 const iconSvg = (item: DocsNavItem) => {
-	const icon = item.icon?.trim();
-	if (!icon) return undefined;
-	if (icon.startsWith("<svg")) return icon;
-	return sidebarIcons[icon];
+  const icon = item.icon?.trim();
+  if (!icon) return undefined;
+  if (icon.startsWith("<svg")) return icon;
+  return sidebarIcons[icon];
 };
-const commandId = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const commandId = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 type CommandItem = {
-	title: string;
-	href: string;
-	external: boolean;
-	icon?: string;
-	keywords: string;
+  title: string;
+  href: string;
+  external: boolean;
+  icon?: string;
+  keywords: string;
 };
 const commandItems = (items: DocsNavItem[]): CommandItem[] =>
-	items.flatMap((item) => {
-		if (isDocsSubmenu(item)) return commandItems(item.pages);
-		const href = itemHref(item);
-		const external = "url" in item && href.startsWith("http");
-		return [{
-			title: item.title,
-			href,
-			external,
-			icon: iconSvg(item),
-			keywords: [item.title, "slug" in item ? item.slug : item.url].filter(Boolean).join(" "),
-		}];
-	});
+  items.flatMap((item) => {
+    if (isDocsSubmenu(item)) return commandItems(item.pages);
+    const href = itemHref(item);
+    const external = "url" in item && href.startsWith("http");
+    return [
+      {
+        title: item.title,
+        href,
+        external,
+        icon: iconSvg(item),
+        keywords: [item.title, "slug" in item ? item.slug : item.url]
+          .filter(Boolean)
+          .join(" "),
+      },
+    ];
+  });
 const commandGroups = manifest.groups
-	.map((group) => ({
-		title: group.title,
-		id: commandId(group.title),
-		items: commandItems(group.pages),
-	}))
-	.filter((group) => group.items.length > 0);
+  .map((group) => ({
+    title: group.title,
+    id: commandId(group.title),
+    items: commandItems(group.pages),
+  }))
+  .filter((group) => group.items.length > 0);
 ---
 
 <Site title={title} description={description} type="article">
-	<div hx-boost="true" hx-target="#content" hx-select="#content" hx-swap="outerHTML show:window:top">
-		<dialog id="command-search" class="command-dialog" aria-label="Command menu" onclick="if (event.target === this) this.close()">
-			<div class="command">
-				<header>
-					<Fragment set:html={Search} />
-					<input
-						type="text"
-						id="command-search-input"
-						placeholder="Search the docs..."
-						autocomplete="off"
-						autocorrect="off"
-						spellcheck="false"
-						aria-autocomplete="list"
-						role="combobox"
-						aria-expanded="true"
-						aria-controls="command-search-menu"
-					/>
-				</header>
-				<div role="menu" id="command-search-menu" aria-orientation="vertical" data-empty="No results found." class="scrollbar">
-					{commandGroups.map((group) => (
-						<div role="group" aria-labelledby={`command-group-${group.id}`}>
-							<span role="heading" id={`command-group-${group.id}`}>{group.title}</span>
-							{group.items.map((item, index) => (
-								<a
-									id={`command-${group.id}-${index + 1}`}
-									href={item.href}
-									role="menuitem"
-									data-keywords={item.keywords}
-									target={item.external ? "_blank" : undefined}
-									rel={item.external ? "noopener noreferrer" : undefined}
-								>
-									{item.icon && <Fragment set:html={item.icon} />}
-									<span>{item.title}</span>
-								</a>
-							))}
-						</div>
-					))}
-				</div>
-			</div>
-		</dialog>
+  <div
+    hx-boost="true"
+    hx-target="#content"
+    hx-select="#content"
+    hx-swap="outerHTML show:window:top"
+  >
+    <dialog
+      id="command-search"
+      class="command-dialog"
+      aria-label="Command menu"
+      onclick="if (event.target === this) this.close()"
+    >
+      <div class="command">
+        <header>
+          <Fragment set:html={Search} />
+          <input
+            type="text"
+            id="command-search-input"
+            placeholder="Search the docs..."
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            aria-autocomplete="list"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="command-search-menu"
+          />
+        </header>
+        <div
+          role="menu"
+          id="command-search-menu"
+          aria-orientation="vertical"
+          data-empty="No results found."
+          class="scrollbar"
+        >
+          {
+            commandGroups.map((group) => (
+              <div role="group" aria-labelledby={`command-group-${group.id}`}>
+                <span role="heading" id={`command-group-${group.id}`}>
+                  {group.title}
+                </span>
+                {group.items.map((item, index) => (
+                  <a
+                    id={`command-${group.id}-${index + 1}`}
+                    href={item.href}
+                    role="menuitem"
+                    data-keywords={item.keywords}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                  >
+                    {item.icon && <Fragment set:html={item.icon} />}
+                    <span>{item.title}</span>
+                  </a>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </dialog>
 
-		<aside id="sidebar" class="sidebar" data-side="left" aria-hidden="false">
-			<nav aria-label="Documentation navigation">
-				<header>
-					<a href="/" hx-boost="false" class="inline-flex h-full items-center px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="heypi docs">
-						<Logo />
-					</a>
-				</header>
-				<section class="scrollbar">
-					{manifest.groups.map((group) => (
-						<div role="group" aria-labelledby={`group-${group.title.toLowerCase().replaceAll(" ", "-")}`}>
-							<h3 id={`group-${group.title.toLowerCase().replaceAll(" ", "-")}`}>{group.title.toUpperCase()}</h3>
-							<ul>
-								{group.pages.map((item) => (
-									<li>
-										{isDocsSubmenu(item) ? (
-											<details open={submenuIsOpen(item)} class="docs-submenu">
-												<summary>
-													{iconKind(item) !== "none" && <Fragment set:html={iconSvg(item)} />}
-													<span>{item.title}</span>
-												</summary>
-												<ul>
-													{item.pages.map((child) => (
-														<li>
-															<a href={itemHref(child)} aria-current={itemIsCurrent(child) ? "page" : undefined} {...itemAttrs(child)}>
-																{iconKind(child) !== "none" && <Fragment set:html={iconSvg(child)} />}
-																<span>{child.title}</span>
-															</a>
-														</li>
-													))}
-												</ul>
-											</details>
-										) : (
-											<a href={itemHref(item)} aria-current={itemIsCurrent(item) ? "page" : undefined} {...itemAttrs(item)}>
-												{iconKind(item) !== "none" && <Fragment set:html={iconSvg(item)} />}
-												<span>{item.title}</span>
-											</a>
-										)}
-									</li>
-								))}
-							</ul>
-						</div>
-					))}
-				</section>
-			</nav>
-		</aside>
+    <aside id="sidebar" class="sidebar" data-side="left" aria-hidden="false">
+      <nav aria-label="Documentation navigation">
+        <header>
+          <a
+            href="/"
+            hx-boost="false"
+            class="inline-flex h-full items-center px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="heypi docs"
+          >
+            <Logo />
+          </a>
+        </header>
+        <section class="scrollbar">
+          {
+            manifest.groups.map((group) => (
+              <div
+                role="group"
+                aria-labelledby={`group-${group.title.toLowerCase().replaceAll(" ", "-")}`}
+              >
+                <h3
+                  id={`group-${group.title.toLowerCase().replaceAll(" ", "-")}`}
+                >
+                  {group.title.toUpperCase()}
+                </h3>
+                <ul>
+                  {group.pages.map((item) => (
+                    <li>
+                      {isDocsSubmenu(item) ? (
+                        <details
+                          open={submenuIsOpen(item)}
+                          class="docs-submenu"
+                        >
+                          <summary>
+                            {iconKind(item) !== "none" && (
+                              <Fragment set:html={iconSvg(item)} />
+                            )}
+                            <span>{item.title}</span>
+                          </summary>
+                          <ul>
+                            {item.pages.map((child) => (
+                              <li>
+                                <a
+                                  href={itemHref(child)}
+                                  aria-current={
+                                    itemIsCurrent(child) ? "page" : undefined
+                                  }
+                                  {...itemAttrs(child)}
+                                >
+                                  {iconKind(child) !== "none" && (
+                                    <Fragment set:html={iconSvg(child)} />
+                                  )}
+                                  <span>{child.title}</span>
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      ) : (
+                        <a
+                          href={itemHref(item)}
+                          aria-current={
+                            itemIsCurrent(item) ? "page" : undefined
+                          }
+                          {...itemAttrs(item)}
+                        >
+                          {iconKind(item) !== "none" && (
+                            <Fragment set:html={iconSvg(item)} />
+                          )}
+                          <span>{item.title}</span>
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </section>
+      </nav>
+    </aside>
 
-		<main id="content">
-		<header id="docs-header" class="sticky inset-x-0 top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-background px-4">
-			<button
-				type="button"
-				onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
-				aria-label="Toggle sidebar"
-				data-tooltip="Toggle sidebar"
-				data-side="bottom"
-				data-align="start"
-				class="btn-sm-icon-ghost"
-			>
-				<Fragment set:html={PanelLeft} />
-			</button>
+    <main id="content">
+      <header
+        id="docs-header"
+        class="sticky inset-x-0 top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-2 border-b bg-background px-4"
+      >
+        <button
+          type="button"
+          onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
+          aria-label="Toggle sidebar"
+          data-tooltip="Toggle sidebar"
+          data-side="bottom"
+          data-align="start"
+          class="btn-sm-icon-ghost"
+        >
+          <Fragment set:html={PanelLeft} />
+        </button>
 
-			<nav class="flex items-center gap-2">
-				<button
-					type="button"
-					aria-label="Search docs"
-					onclick="window.openDocsCommandSearch?.()"
-					class="btn-sm-secondary hidden w-56 justify-start text-muted-foreground md:inline-flex lg:w-72"
-				>
-					<Fragment set:html={Search} />
-					<span>Search</span>
-					<kbd class="kbd ml-auto -mr-1.5">⌘K</kbd>
-				</button>
-				<button
-					type="button"
-					aria-label="Search docs"
-					data-tooltip="Search docs"
-					data-side="bottom"
-					data-align="end"
-					onclick="window.openDocsCommandSearch?.()"
-					class="btn-sm-icon-ghost md:hidden"
-				>
-					<Fragment set:html={Search} />
-				</button>
-				<a
-					href="https://github.com/hunvreus/heypi"
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="GitHub"
-					class="btn-sm-ghost hidden sm:inline-flex"
-				>
-					<Fragment set:html={GitHubLogo} />
-					<span>GitHub</span>
-				</a>
-				<a
-					href="https://discord.com/channels/1508147316710703215/1511161118385635429"
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="Discord"
-					class="btn-sm-ghost hidden sm:inline-flex"
-				>
-					<Fragment set:html={DiscordLogo} />
-					<span>Discord</span>
-				</a>
-				<a
-					href="https://github.com/hunvreus/heypi"
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="GitHub"
-					data-tooltip="GitHub"
-					data-side="bottom"
-					data-align="end"
-					class="btn-sm-icon-ghost sm:hidden"
-				>
-					<Fragment set:html={GitHubLogo} />
-				</a>
-				<a
-					href="https://discord.com/channels/1508147316710703215/1511161118385635429"
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="Discord"
-					data-tooltip="Discord"
-					data-side="bottom"
-					data-align="end"
-					class="btn-sm-icon-ghost sm:hidden"
-				>
-					<Fragment set:html={DiscordLogo} />
-				</a>
-			</nav>
-		</header>
+        <nav class="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Search docs"
+            onclick="window.openDocsCommandSearch?.()"
+            class="btn-sm-secondary hidden w-56 justify-start text-muted-foreground md:inline-flex lg:w-72"
+          >
+            <Fragment set:html={Search} />
+            <span>Search</span>
+            <kbd class="kbd ml-auto -mr-1.5">⌘K</kbd>
+          </button>
+          <button
+            type="button"
+            aria-label="Search docs"
+            data-tooltip="Search docs"
+            data-side="bottom"
+            data-align="end"
+            onclick="window.openDocsCommandSearch?.()"
+            class="btn-sm-icon-ghost md:hidden"
+          >
+            <Fragment set:html={Search} />
+          </button>
+          <a
+            href="https://github.com/hunvreus/heypi"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            class="btn-sm-ghost hidden sm:inline-flex"
+          >
+            <Fragment set:html={GitHubLogo} />
+            <span>GitHub</span>
+          </a>
+          <a
+            href="https://discord.com/channels/1508147316710703215/1511161118385635429"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Discord"
+            class="btn-sm-ghost hidden sm:inline-flex"
+          >
+            <Fragment set:html={DiscordLogo} />
+            <span>Discord</span>
+          </a>
+          <a
+            href="https://github.com/hunvreus/heypi"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            data-tooltip="GitHub"
+            data-side="bottom"
+            data-align="end"
+            class="btn-sm-icon-ghost sm:hidden"
+          >
+            <Fragment set:html={GitHubLogo} />
+          </a>
+          <a
+            href="https://discord.com/channels/1508147316710703215/1511161118385635429"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Discord"
+            data-tooltip="Discord"
+            data-side="bottom"
+            data-align="end"
+            class="btn-sm-icon-ghost sm:hidden"
+          >
+            <Fragment set:html={DiscordLogo} />
+          </a>
+        </nav>
+      </header>
 
-		<div class="flex gap-10 p-4 md:p-6 xl:p-12">
-			<article class="min-w-0 flex-1">
-				<div class="mx-auto w-full max-w-2xl space-y-10">
-					<header class="space-y-2">
-						<div class="flex items-start gap-x-2">
-							<h1 class="mr-auto text-3xl font-semibold tracking-tight sm:text-4xl">{page.title}</h1>
-							<div class="mt-1.5 flex items-center gap-x-2">
-								<div role="group" class="button-group">
-									<button type="button" class="btn-sm-secondary" data-md-url={markdownHref} onclick="window.copyPageMarkdown?.(this)">
-										<span data-copy-icon>
-											<Fragment set:html={Copy} />
-										</span>
-										<span data-check-icon class="hidden">
-											<Fragment set:html={Check} />
-										</span>
-										<span data-copy-label class="hidden sm:block">Copy page</span>
-									</button>
-									<hr role="separator" />
-									<div class="dropdown-menu">
-										<button type="button" aria-haspopup="menu" aria-controls="page-actions-menu" aria-expanded="false" class="btn-sm-icon-secondary">
-											<Fragment set:html={ChevronDown} />
-										</button>
-										<div data-popover aria-hidden="true" data-align="end">
-											<div role="menu" id="page-actions-menu">
-												<a role="menuitem" href={markdownHref} target="_blank" rel="noopener">
-													<Fragment set:html={MarkdownLogo} />
-													View as Markdown
-												</a>
-												<a role="menuitem" href={`https://chatgpt.com/?q=${encodedLlmPrompt}`} target="_blank" rel="noopener">
-													<Fragment set:html={OpenAILogo} />
-													Open in ChatGPT
-												</a>
-												<a role="menuitem" href={`https://claude.ai/new?q=${encodedLlmPrompt}`} target="_blank" rel="noopener">
-													<Fragment set:html={ClaudeLogo} />
-													Open in Claude
-												</a>
-												<a role="menuitem" href={`cursor://anysphere.cursor-deeplink/prompt?text=${encodedLlmPrompt}`} target="_blank" rel="noopener">
-													<Fragment set:html={CursorLogo} />
-													Open in Cursor
-												</a>
-											</div>
-										</div>
-									</div>
-								</div>
-								{(previousPage || nextPage) && (
-									<div role="group" class="button-group">
-									{previousPage && (
-										<a href={pageHref(previousPage.slug)} class="btn-sm-icon-secondary hidden sm:flex">
-											<span class="sr-only">{previousPage.title}</span>
-											<Fragment set:html={ArrowLeft} />
-										</a>
-									)}
-									{previousPage && nextPage && <hr role="separator" />}
-									{nextPage && (
-										<a href={pageHref(nextPage.slug)} class="btn-sm-icon-secondary hidden sm:flex">
-											<span class="sr-only">{nextPage.title}</span>
-											<Fragment set:html={ArrowRight} />
-										</a>
-									)}
-									</div>
-								)}
-							</div>
-						</div>
-					</header>
-					<div class="prose">
-						<slot />
-					</div>
-					{(previousPage || nextPage) && (
-						<footer class="mt-12 flex items-center">
-							{previousPage && (
-								<a href={pageHref(previousPage.slug)} class="btn-sm-secondary mr-auto">
-									<Fragment set:html={ArrowLeft} />
-									{previousPage.title}
-								</a>
-							)}
-							{nextPage && (
-								<a href={pageHref(nextPage.slug)} class="btn-sm-secondary ml-auto">
-									{nextPage.title}
-									<Fragment set:html={ArrowRight} />
-								</a>
-							)}
-						</footer>
-					)}
-				</div>
-			</article>
+      <div class="flex gap-10 p-4 md:p-6 xl:p-12">
+        <article class="min-w-0 flex-1">
+          <div class="mx-auto w-full max-w-2xl space-y-10">
+            <header class="space-y-2">
+              <div class="flex items-start gap-x-2">
+                <h1
+                  class="mr-auto text-2xl font-semibold tracking-tight sm:text-3xl"
+                >
+                  {page.title}
+                </h1>
+                <div class="flex items-center gap-x-2">
+                  <div role="group" class="button-group">
+                    <button
+                      type="button"
+                      class="btn-sm-secondary"
+                      data-md-url={markdownHref}
+                      onclick="window.copyPageMarkdown?.(this)"
+                    >
+                      <span data-copy-icon>
+                        <Fragment set:html={Copy} />
+                      </span>
+                      <span data-check-icon class="hidden">
+                        <Fragment set:html={Check} />
+                      </span>
+                      <span data-copy-label class="hidden sm:block"
+                        >Copy page</span
+                      >
+                    </button>
+                    <hr role="separator" />
+                    <div class="dropdown-menu">
+                      <button
+                        type="button"
+                        aria-haspopup="menu"
+                        aria-controls="page-actions-menu"
+                        aria-expanded="false"
+                        class="btn-sm-icon-secondary"
+                      >
+                        <Fragment set:html={ChevronDown} />
+                      </button>
+                      <div data-popover aria-hidden="true" data-align="end">
+                        <div role="menu" id="page-actions-menu">
+                          <a
+                            role="menuitem"
+                            href={markdownHref}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <Fragment set:html={MarkdownLogo} />
+                            View as Markdown
+                          </a>
+                          <a
+                            role="menuitem"
+                            href={`https://chatgpt.com/?q=${encodedLlmPrompt}`}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <Fragment set:html={OpenAILogo} />
+                            Open in ChatGPT
+                          </a>
+                          <a
+                            role="menuitem"
+                            href={`https://claude.ai/new?q=${encodedLlmPrompt}`}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <Fragment set:html={ClaudeLogo} />
+                            Open in Claude
+                          </a>
+                          <a
+                            role="menuitem"
+                            href={`cursor://anysphere.cursor-deeplink/prompt?text=${encodedLlmPrompt}`}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            <Fragment set:html={CursorLogo} />
+                            Open in Cursor
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {
+                    (previousPage || nextPage) && (
+                      <div role="group" class="button-group">
+                        {previousPage && (
+                          <a
+                            href={pageHref(previousPage.slug)}
+                            class="btn-sm-icon-secondary hidden sm:flex"
+                          >
+                            <span class="sr-only">{previousPage.title}</span>
+                            <Fragment set:html={ArrowLeft} />
+                          </a>
+                        )}
+                        {previousPage && nextPage && <hr role="separator" />}
+                        {nextPage && (
+                          <a
+                            href={pageHref(nextPage.slug)}
+                            class="btn-sm-icon-secondary hidden sm:flex"
+                          >
+                            <span class="sr-only">{nextPage.title}</span>
+                            <Fragment set:html={ArrowRight} />
+                          </a>
+                        )}
+                      </div>
+                    )
+                  }
+                </div>
+              </div>
+            </header>
+            <div class="prose">
+              <slot />
+            </div>
+            {
+              (previousPage || nextPage) && (
+                <footer class="mt-12 flex items-center">
+                  {previousPage && (
+                    <a
+                      href={pageHref(previousPage.slug)}
+                      class="btn-sm-secondary mr-auto"
+                    >
+                      <Fragment set:html={ArrowLeft} />
+                      {previousPage.title}
+                    </a>
+                  )}
+                  {nextPage && (
+                    <a
+                      href={pageHref(nextPage.slug)}
+                      class="btn-sm-secondary ml-auto"
+                    >
+                      {nextPage.title}
+                      <Fragment set:html={ArrowRight} />
+                    </a>
+                  )}
+                </footer>
+              )
+            }
+          </div>
+        </article>
 
-			{headings.length > 0 && (
-				<aside class="hidden w-56 xl:block">
-					<div class="sticky top-20 space-y-2 text-sm">
-						<h2 class="text-xs font-medium text-muted-foreground">
-							ON THIS PAGE
-						</h2>
-						<nav class="docs-toc space-y-2">
-							{headings.map((heading) => (
-								<a class:list={["block text-muted-foreground transition-colors hover:text-[var(--heading-foreground)]", heading.depth === 3 && "pl-3"]} href={`#${heading.id}`} data-heading-id={heading.id}>
-									{heading.text}
-								</a>
-							))}
-						</nav>
-					</div>
-				</aside>
-			)}
-		</div>
-		</main>
-	</div>
+        {
+          headings.length > 0 && (
+            <aside class="hidden w-56 xl:block">
+              <div class="sticky top-20 space-y-2 text-sm">
+                <h2 class="text-xs font-medium text-muted-foreground">
+                  ON THIS PAGE
+                </h2>
+                <nav class="docs-toc space-y-2">
+                  {headings.map((heading) => (
+                    <a
+                      class:list={[
+                        "block text-muted-foreground transition-colors hover:text-[var(--heading-foreground)]",
+                        heading.depth === 3 && "pl-3",
+                      ]}
+                      href={`#${heading.id}`}
+                      data-heading-id={heading.id}
+                    >
+                      {heading.text}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+          )
+        }
+      </div>
+    </main>
+  </div>
 
-	<script is:inline>
-		(() => {
-		function openDocsCommandSearch() {
-			const dialog = document.getElementById("command-search");
-			if (!dialog) return;
+  <script is:inline>
+    (() => {
+      function openDocsCommandSearch() {
+        const dialog = document.getElementById("command-search");
+        if (!dialog) return;
 
-			if (dialog.open) {
-				dialog.close();
-				return;
-			}
+        if (dialog.open) {
+          dialog.close();
+          return;
+        }
 
-			dialog.showModal();
-			const input = dialog.querySelector("header input");
-			if (input) {
-				input.value = "";
-				input.dispatchEvent(new Event("input", { bubbles: true }));
-				input.focus();
-			}
-		}
+        dialog.showModal();
+        const input = dialog.querySelector("header input");
+        if (input) {
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.focus();
+        }
+      }
 
-		window.openDocsCommandSearch = openDocsCommandSearch;
+      window.openDocsCommandSearch = openDocsCommandSearch;
 
-		function normalizedPath(value) {
-			try {
-				const url = new URL(value, window.location.href);
-				if (url.origin !== window.location.origin) return "";
-				return url.pathname.replace(/\/index\.html$/, "").replace(/\/$/, "") || "/";
-			} catch {
-				return "";
-			}
-		}
+      function normalizedPath(value) {
+        try {
+          const url = new URL(value, window.location.href);
+          if (url.origin !== window.location.origin) return "";
+          return (
+            url.pathname.replace(/\/index\.html$/, "").replace(/\/$/, "") || "/"
+          );
+        } catch {
+          return "";
+        }
+      }
 
-		function updateDocsSidebarCurrent() {
-			const sidebar = document.getElementById("sidebar");
-			if (!sidebar) return;
+      function updateDocsSidebarCurrent() {
+        const sidebar = document.getElementById("sidebar");
+        if (!sidebar) return;
 
-			const currentPath = normalizedPath(window.location.href);
-			let currentLink = null;
+        const currentPath = normalizedPath(window.location.href);
+        let currentLink = null;
 
-			sidebar.querySelectorAll("a[aria-current='page']").forEach((link) => {
-				link.removeAttribute("aria-current");
-			});
+        sidebar.querySelectorAll("a[aria-current='page']").forEach((link) => {
+          link.removeAttribute("aria-current");
+        });
 
-			sidebar.querySelectorAll("a[href]").forEach((link) => {
-				if (currentLink) return;
-				if (normalizedPath(link.href) === currentPath) currentLink = link;
-			});
+        sidebar.querySelectorAll("a[href]").forEach((link) => {
+          if (currentLink) return;
+          if (normalizedPath(link.href) === currentPath) currentLink = link;
+        });
 
-			if (!currentLink) return;
+        if (!currentLink) return;
 
-			currentLink.setAttribute("aria-current", "page");
-			const parentDetails = currentLink.closest("details");
-			if (parentDetails) parentDetails.open = true;
-		}
+        currentLink.setAttribute("aria-current", "page");
+        const parentDetails = currentLink.closest("details");
+        if (parentDetails) parentDetails.open = true;
+      }
 
-		window.updateDocsSidebarCurrent = updateDocsSidebarCurrent;
+      window.updateDocsSidebarCurrent = updateDocsSidebarCurrent;
 
-		let docsTocFrame = 0;
+      let docsTocFrame = 0;
 
-		function updateDocsTocCurrent() {
-			docsTocFrame = 0;
+      function updateDocsTocCurrent() {
+        docsTocFrame = 0;
 
-			const content = document.getElementById("content");
-			if (!content) return;
+        const content = document.getElementById("content");
+        if (!content) return;
 
-			const links = Array.from(content.querySelectorAll(".docs-toc a[data-heading-id]"));
-			if (links.length === 0) return;
+        const links = Array.from(
+          content.querySelectorAll(".docs-toc a[data-heading-id]"),
+        );
+        if (links.length === 0) return;
 
-			const headings = links
-				.map((link) => {
-					const id = link.getAttribute("data-heading-id");
-					return id ? document.getElementById(id) : null;
-				})
-				.filter(Boolean);
-			if (headings.length === 0) return;
+        const headings = links
+          .map((link) => {
+            const id = link.getAttribute("data-heading-id");
+            return id ? document.getElementById(id) : null;
+          })
+          .filter(Boolean);
+        if (headings.length === 0) return;
 
-			const offset = 96;
-			let activeHeading = headings[0];
+        const offset = 96;
+        let activeHeading = headings[0];
 
-			for (const heading of headings) {
-				if (heading.getBoundingClientRect().top <= offset) activeHeading = heading;
-				else break;
-			}
+        for (const heading of headings) {
+          if (heading.getBoundingClientRect().top <= offset)
+            activeHeading = heading;
+          else break;
+        }
 
-			links.forEach((link) => {
-				if (link.getAttribute("data-heading-id") === activeHeading.id) {
-					link.setAttribute("aria-current", "true");
-				} else {
-					link.removeAttribute("aria-current");
-				}
-			});
-		}
+        links.forEach((link) => {
+          if (link.getAttribute("data-heading-id") === activeHeading.id) {
+            link.setAttribute("aria-current", "true");
+          } else {
+            link.removeAttribute("aria-current");
+          }
+        });
+      }
 
-		function scheduleDocsTocCurrent() {
-			if (docsTocFrame) return;
-			docsTocFrame = window.requestAnimationFrame(updateDocsTocCurrent);
-		}
+      function scheduleDocsTocCurrent() {
+        if (docsTocFrame) return;
+        docsTocFrame = window.requestAnimationFrame(updateDocsTocCurrent);
+      }
 
-		window.updateDocsTocCurrent = updateDocsTocCurrent;
+      window.updateDocsTocCurrent = updateDocsTocCurrent;
 
-		if (!window.__docsCommandSearchBound) {
-			window.__docsCommandSearchBound = true;
-			window.addEventListener("keydown", (event) => {
-				const key = event.key?.toLowerCase();
-				if ((event.metaKey || event.ctrlKey) && (key === "k" || event.code === "KeyK")) {
-					event.preventDefault();
-					window.openDocsCommandSearch?.();
-				}
-			}, { capture: true });
-			window.addEventListener("popstate", updateDocsSidebarCurrent);
-			window.addEventListener("htmx:afterSettle", updateDocsSidebarCurrent);
-			window.addEventListener("htmx:pushedIntoHistory", updateDocsSidebarCurrent);
-			window.addEventListener("htmx:replacedInHistory", updateDocsSidebarCurrent);
-			window.addEventListener("scroll", scheduleDocsTocCurrent, { passive: true });
-			window.addEventListener("hashchange", scheduleDocsTocCurrent);
-			window.addEventListener("resize", scheduleDocsTocCurrent);
-			window.addEventListener("popstate", scheduleDocsTocCurrent);
-			window.addEventListener("htmx:afterSettle", scheduleDocsTocCurrent);
-			window.addEventListener("htmx:pushedIntoHistory", scheduleDocsTocCurrent);
-			window.addEventListener("htmx:replacedInHistory", scheduleDocsTocCurrent);
-		}
+      if (!window.__docsCommandSearchBound) {
+        window.__docsCommandSearchBound = true;
+        window.addEventListener(
+          "keydown",
+          (event) => {
+            const key = event.key?.toLowerCase();
+            if (
+              (event.metaKey || event.ctrlKey) &&
+              (key === "k" || event.code === "KeyK")
+            ) {
+              event.preventDefault();
+              window.openDocsCommandSearch?.();
+            }
+          },
+          { capture: true },
+        );
+        window.addEventListener("popstate", updateDocsSidebarCurrent);
+        window.addEventListener("htmx:afterSettle", updateDocsSidebarCurrent);
+        window.addEventListener(
+          "htmx:pushedIntoHistory",
+          updateDocsSidebarCurrent,
+        );
+        window.addEventListener(
+          "htmx:replacedInHistory",
+          updateDocsSidebarCurrent,
+        );
+        window.addEventListener("scroll", scheduleDocsTocCurrent, {
+          passive: true,
+        });
+        window.addEventListener("hashchange", scheduleDocsTocCurrent);
+        window.addEventListener("resize", scheduleDocsTocCurrent);
+        window.addEventListener("popstate", scheduleDocsTocCurrent);
+        window.addEventListener("htmx:afterSettle", scheduleDocsTocCurrent);
+        window.addEventListener(
+          "htmx:pushedIntoHistory",
+          scheduleDocsTocCurrent,
+        );
+        window.addEventListener(
+          "htmx:replacedInHistory",
+          scheduleDocsTocCurrent,
+        );
+      }
 
-		updateDocsSidebarCurrent();
-		updateDocsTocCurrent();
+      updateDocsSidebarCurrent();
+      updateDocsTocCurrent();
 
-		window.copyPageMarkdown = async function copyPageMarkdown(button) {
-			const markdownUrl = button?.dataset?.mdUrl;
-			if (!markdownUrl) return;
+      window.copyPageMarkdown = async function copyPageMarkdown(button) {
+        const markdownUrl = button?.dataset?.mdUrl;
+        if (!markdownUrl) return;
 
-			const copyIcon = button.querySelector("[data-copy-icon]");
-			const checkIcon = button.querySelector("[data-check-icon]");
-			const showCopied = () => {
-				copyIcon?.classList.add("hidden");
-				checkIcon?.classList.remove("hidden");
-			};
-			const showDefault = () => {
-				checkIcon?.classList.add("hidden");
-				copyIcon?.classList.remove("hidden");
-			};
+        const copyIcon = button.querySelector("[data-copy-icon]");
+        const checkIcon = button.querySelector("[data-check-icon]");
+        const showCopied = () => {
+          copyIcon?.classList.add("hidden");
+          checkIcon?.classList.remove("hidden");
+        };
+        const showDefault = () => {
+          checkIcon?.classList.add("hidden");
+          copyIcon?.classList.remove("hidden");
+        };
 
-			try {
-				const response = await fetch(markdownUrl, { credentials: "same-origin", cache: "no-store" });
-				if (!response.ok) throw new Error("Failed to fetch markdown");
-				await writeToClipboard(await response.text());
+        try {
+          const response = await fetch(markdownUrl, {
+            credentials: "same-origin",
+            cache: "no-store",
+          });
+          if (!response.ok) throw new Error("Failed to fetch markdown");
+          await writeToClipboard(await response.text());
 
-				showCopied();
-				window.setTimeout(showDefault, 1500);
-			} catch {
-				showDefault();
-				window.open(new URL(markdownUrl, window.location.href).toString(), "_blank", "noopener");
-			}
-		};
+          showCopied();
+          window.setTimeout(showDefault, 1500);
+        } catch {
+          showDefault();
+          window.open(
+            new URL(markdownUrl, window.location.href).toString(),
+            "_blank",
+            "noopener",
+          );
+        }
+      };
 
-		async function writeToClipboard(text) {
-			if (navigator.clipboard?.writeText && window.isSecureContext) {
-				await navigator.clipboard.writeText(text);
-				return;
-			}
+      async function writeToClipboard(text) {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
 
-			const textarea = document.createElement("textarea");
-			textarea.value = text;
-			textarea.setAttribute("readonly", "");
-			textarea.style.position = "fixed";
-			textarea.style.top = "-9999px";
-			textarea.style.left = "-9999px";
-			document.body.appendChild(textarea);
-			textarea.select();
-			const ok = document.execCommand("copy");
-			textarea.remove();
-			if (!ok) throw new Error("Clipboard unavailable");
-		}
-		})();
-	</script>
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const ok = document.execCommand("copy");
+        textarea.remove();
+        if (!ok) throw new Error("Clipboard unavailable");
+      }
+    })();
+  </script>
 </Site>

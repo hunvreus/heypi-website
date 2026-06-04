@@ -10,126 +10,130 @@
 @source "./**/*.{astro,ts,js}";
 
 @theme {
-	--font-sans: "JetBrains Mono", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-	--font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-	--default-font-family: var(--font-sans);
-	--default-mono-font-family: var(--font-mono);
+  --font-sans:
+    "JetBrains Mono", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --default-font-family: var(--font-sans);
+  --default-mono-font-family: var(--font-mono);
 }
 
 @layer base {
-	.scrollbar {
-		scrollbar-color: var(--border) transparent;
-	}
+  .scrollbar {
+    scrollbar-color: var(--border) transparent;
+  }
 
-	.scrollbar::-webkit-scrollbar {
-		@apply h-4 w-4;
-	}
+  .scrollbar::-webkit-scrollbar {
+    @apply h-4 w-4;
+  }
 
-	.scrollbar::-webkit-scrollbar-track {
-		@apply bg-transparent;
-	}
+  .scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
 
-	.scrollbar::-webkit-scrollbar-thumb {
-		@apply rounded-full border-4 border-transparent bg-border bg-clip-padding;
-	}
+  .scrollbar::-webkit-scrollbar-thumb {
+    @apply rounded-full border-4 border-transparent bg-border bg-clip-padding;
+  }
 
-	.scrollbar::-webkit-scrollbar-corner {
-		@apply bg-transparent;
-	}
+  .scrollbar::-webkit-scrollbar-corner {
+    @apply bg-transparent;
+  }
 
-	.scrollbar-thin,
-	.prose pre {
-		scrollbar-width: thin;
-		scrollbar-color: var(--border) transparent;
-	}
+  .scrollbar-thin,
+  .prose pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
 
-	.scrollbar-thin::-webkit-scrollbar,
-	.prose pre::-webkit-scrollbar {
-		@apply h-2.5 w-2.5;
-	}
+  .scrollbar-thin::-webkit-scrollbar,
+  .prose pre::-webkit-scrollbar {
+    @apply h-2.5 w-2.5;
+  }
 
-	.scrollbar-thin::-webkit-scrollbar-track,
-	.prose pre::-webkit-scrollbar-track {
-		@apply bg-transparent;
-	}
+  .scrollbar-thin::-webkit-scrollbar-track,
+  .prose pre::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
 
-	.scrollbar-thin::-webkit-scrollbar-thumb,
-	.prose pre::-webkit-scrollbar-thumb {
-		@apply rounded-full border-2 border-transparent bg-border bg-clip-padding;
-	}
+  .scrollbar-thin::-webkit-scrollbar-thumb,
+  .prose pre::-webkit-scrollbar-thumb {
+    @apply rounded-full border-2 border-transparent bg-border bg-clip-padding;
+  }
 
-	.scrollbar-thin::-webkit-scrollbar-corner,
-	.prose pre::-webkit-scrollbar-corner {
-		@apply bg-transparent;
-	}
+  .scrollbar-thin::-webkit-scrollbar-corner,
+  .prose pre::-webkit-scrollbar-corner {
+    @apply bg-transparent;
+  }
 
-	.docs-submenu > summary {
-		@apply flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring;
-	}
+  .docs-submenu > summary {
+    @apply flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring;
+  }
 
-	.docs-submenu > summary::marker {
-		content: "";
-	}
+  .docs-submenu > summary::marker {
+    content: "";
+  }
 
-	.docs-submenu > summary::-webkit-details-marker {
-		display: none;
-	}
+  .docs-submenu > summary::-webkit-details-marker {
+    display: none;
+  }
 
-	.docs-submenu > summary > svg {
-		@apply size-4 shrink-0;
-	}
+  .docs-submenu > summary > svg {
+    @apply size-4 shrink-0;
+  }
 
-	.docs-submenu > summary::after {
-		@apply ml-auto block size-3.5 shrink-0 bg-current transition-transform;
-		content: "";
-		mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-		mask-position: center;
-		mask-repeat: no-repeat;
-		mask-size: 1rem;
-	}
+  .docs-submenu > summary::after {
+    @apply ml-auto block size-3.5 shrink-0 bg-current transition-transform;
+    content: "";
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 1rem;
+  }
 
-	.docs-submenu:not([open]) > summary::after {
-		@apply -rotate-90;
-	}
+  .docs-submenu:not([open]) > summary::after {
+    @apply -rotate-90;
+  }
 
-	.docs-submenu > ul {
-		@apply mt-1 space-y-1 pl-4;
-	}
+  .docs-submenu > ul {
+    @apply mt-1 space-y-1 pl-4;
+  }
 
-	:where(h1, h2, h3, h4, h5, h6) {
-		color: var(--heading-foreground);
-	}
+  :where(h1, h2, h3, h4, h5, h6) {
+    color: var(--heading-foreground);
+  }
 }
 
 .prose {
-	@apply my-6 leading-7 text-foreground;
+  @apply my-6 leading-7 text-foreground;
 }
 
 .prose > h1 {
-	@apply hidden;
+  @apply hidden;
 }
 
 .prose > h2,
 .prose > h3,
 .prose > h4 {
-	@apply my-6 scroll-m-20 font-semibold tracking-tight;
+  @apply my-6 scroll-m-20 font-semibold tracking-tight;
 }
 
 .prose .header-anchor {
-	color: var(--heading-foreground);
-	@apply no-underline;
+  color: var(--heading-foreground);
+  @apply no-underline;
 }
 
 .docs-toc a[aria-current="true"] {
-	color: var(--heading-foreground);
+  color: var(--heading-foreground);
 }
 
 .prose > h2 {
-	@apply mt-10 text-2xl;
+  @apply mt-10 text-xl sm:text-2xl;
 }
 
 .prose > h3 {
-	@apply mt-8 text-xl;
+  @apply mt-8 text-lg sm:text-xl;
 }
 
 .prose > p,
@@ -139,81 +143,88 @@
 .prose > blockquote,
 .prose > table,
 .prose > div:has(> table) {
-	@apply my-6;
+  @apply my-6;
 }
 
 .prose > *:first-child {
-	@apply mt-0;
+  @apply mt-0;
 }
 
 .prose > *:last-child {
-	@apply mb-0;
+  @apply mb-0;
 }
 
 .prose a {
-	@apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:text-[var(--heading-foreground)] hover:decoration-foreground;
+  @apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:text-[var(--heading-foreground)] hover:decoration-foreground;
 }
 
 .prose ul {
-	@apply list-disc pl-6;
+  @apply list-disc pl-6;
 }
 
 .prose ol {
-	@apply list-none pl-0;
-	counter-reset: prose-ordered-list;
+  @apply list-none pl-0;
+  counter-reset: prose-ordered-list;
 }
 
 .prose ol > li {
-	@apply relative pl-7;
-	counter-increment: prose-ordered-list;
+  @apply relative pl-7;
+  counter-increment: prose-ordered-list;
 }
 
 .prose ol > li::before {
-	@apply absolute left-0 w-5 text-right;
-	content: counter(prose-ordered-list) ".";
+  @apply absolute left-0 w-5 text-right;
+  content: counter(prose-ordered-list) ".";
 }
 
 .prose li {
-	@apply mt-2;
+  @apply mt-2;
 }
 
 .prose code:not(pre code) {
-	@apply rounded-md bg-muted px-1.5 py-0.5 font-mono text-sm;
+  @apply rounded-md bg-muted px-1.5 py-0.5 font-mono;
 }
 
 .prose :where(h2, h3, h4) code:not(pre code) {
-	@apply bg-transparent p-0 text-inherit;
+  @apply bg-transparent p-0;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .prose pre {
-	@apply relative overflow-x-auto rounded-none bg-muted text-sm;
+  @apply relative overflow-x-auto rounded-none bg-muted text-sm;
 }
 
 .prose pre code {
-	@apply block bg-transparent p-4;
+  @apply block bg-transparent p-4;
+}
+
+pre:has(> code) {
+  @apply relative;
 }
 
 pre:has(> code) > .code-block-copy {
-	@apply absolute right-2.5 top-2.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:size-4;
+  @apply absolute right-2.5 top-3.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground outline-none transition hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-100 [&_svg]:size-4;
 }
 
 .prose blockquote {
-	@apply border-l-4 pl-4 text-muted-foreground;
+  @apply border-l-4 pl-4 text-muted-foreground;
 }
 
 .prose .table th,
 .prose .table td {
-	@apply whitespace-normal;
+  @apply whitespace-normal;
 }
 
 pre.shiki {
-	background-color: var(--color-muted) !important;
+  background-color: var(--color-muted) !important;
 }
 
 .shiki span {
-	color: var(--shiki-light);
+  color: var(--shiki-light);
 }
 
 html.dark .shiki span {
-	color: var(--shiki-dark);
+  color: var(--shiki-dark);
 }

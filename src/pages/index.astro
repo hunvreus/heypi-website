@@ -9,84 +9,34 @@ import { codeToHtml } from "shiki";
 const prompt =
   "Read https://heypi.dev/start.md then help create my first agent.";
 
-const examples = [
+const installCommands = [
   {
-    id: "slack-agent",
-    label: "Slack agent",
-    code: `// Minimal Slack agent with durable state and a scoped runtime workspace.
-import { agentFrom, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
-
-const app = createHeypi({
-  state: { root: "./state" },
-  adapters: [slack({
-    botToken: process.env.SLACK_BOT_TOKEN!,
-    appToken: process.env.SLACK_APP_TOKEN!,
-  })],
-  agent: agentFrom("./agent", { model: "openai/gpt-5-mini" }),
-  runtime: { root: workspace("./workspace") },
-});
-
-await runHeypi(app);`,
+    id: "npm",
+    label: "npm",
+    code: "npm create heypi@latest my-agent",
   },
   {
-    id: "approval-rules",
-    label: "Approval rules",
-    code: `// Require approval only when a command crosses your policy boundary.
-import { agentFrom, coreTools, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
-
-const app = createHeypi({
-  state: { root: "./state" },
-  adapters: [slack({
-    botToken: process.env.SLACK_BOT_TOKEN!,
-    appToken: process.env.SLACK_APP_TOKEN!,
-  })],
-  agent: agentFrom("./agent", { model: "openai/gpt-5-mini" }),
-  runtime: { root: workspace("./workspace") },
-  tools: coreTools({
-    bash: {
-      confirm: ({ command }) =>
-        command.includes("deploy")
-          ? { reason: "Deploys require approval." }
-          : false,
-    },
-  }),
-  approvals: { approvers: ["slack:T123:U456"] },
-});
-
-await runHeypi(app);`,
+    id: "pnpm",
+    label: "pnpm",
+    code: "pnpm create heypi@latest my-agent",
   },
   {
-    id: "docker-runtime",
-    label: "Docker runtime",
-    code: `// Run core command and file tools inside a warm Docker runtime.
-import { agentFrom, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
-import { dockerRuntime } from "@hunvreus/heypi-runtime-docker";
-
-const app = createHeypi({
-  state: { root: "./state" },
-  adapters: [slack({
-    botToken: process.env.SLACK_BOT_TOKEN!,
-    appToken: process.env.SLACK_APP_TOKEN!,
-  })],
-  agent: agentFrom("./agent", { model: "openai/gpt-5-mini" }),
-  runtime: {
-    root: workspace("./workspace"),
-    provider: dockerRuntime({
-      image: "buildpack-deps:bookworm-curl",
-      idleMs: 10 * 60 * 1000,
-    }),
+    id: "yarn",
+    label: "Yarn",
+    code: "yarn create heypi my-agent",
   },
-});
-
-await runHeypi(app);`,
+  {
+    id: "bun",
+    label: "Bun",
+    code: "bun create heypi my-agent",
   },
 ];
 
-const highlightedExamples = await Promise.all(
-  examples.map(async (example) => ({
-    ...example,
-    html: await codeToHtml(example.code, {
-      lang: "ts",
+const highlightedInstallCommands = await Promise.all(
+  installCommands.map(async (command) => ({
+    ...command,
+    html: await codeToHtml(command.code, {
+      lang: "bash",
       themes: {
         light: "vesper",
         dark: "vesper",
@@ -147,7 +97,7 @@ const faqs = [
   {
     question: "How do I use heypi?",
     answer:
-      'Create a small TypeScript app with <code>createHeypi()</code>, add an adapter, load a Pi agent with <code>agentFrom()</code>, choose a runtime workspace, and run it as a long-running Node.js service. Start with the <a href="/docs/quickstart">quickstart</a>.',
+      "Run <code>npm create heypi@latest</code>. It scaffolds a TypeScript app, prompts for adapter, runtime, and model, writes starter agent files, and prepares environment placeholders. You can still build the same app manually with <code>createHeypi()</code>, <code>agentFrom()</code>, and an adapter.",
   },
   {
     question: "What can I connect it to?",
@@ -246,8 +196,50 @@ const faqs = [
             things safe with sandboxed commands and approval flows for sensitive
             actions.
           </p>
+          <div class="tabs mt-8 w-full" id="landing-install">
+            <nav
+              role="tablist"
+              aria-orientation="horizontal"
+              data-variant="line"
+            >
+              {
+                highlightedInstallCommands.map((command, index) => (
+                  <button
+                    type="button"
+                    role="tab"
+                    id={`${command.id}-install-tab`}
+                    aria-controls={`${command.id}-install-panel`}
+                    aria-selected={index === 0 ? "true" : "false"}
+                    tabindex={index === 0 ? "0" : "-1"}
+                  >
+                    {command.label}
+                  </button>
+                ))
+              }
+            </nav>
+            {
+              highlightedInstallCommands.map((command, index) => (
+                <div
+                  role="tabpanel"
+                  id={`${command.id}-install-panel`}
+                  aria-labelledby={`${command.id}-install-tab`}
+                  tabindex="-1"
+                  aria-selected={index === 0 ? "true" : "false"}
+                  hidden={index !== 0}
+                >
+                  <div
+                    class="landing-code scrollbar overflow-x-auto bg-muted"
+                    set:html={command.html}
+                  />
+                </div>
+              ))
+            }
+          </div>
           <div class="mt-8 flex flex-wrap gap-3">
-            <button type="button" class="btn-lg" data-copy-prompt={prompt}>
+            <a class="btn-lg" href="/docs/quickstart#step-2-fill-in-env">
+              Configure agent
+            </a>
+            <button type="button" class="btn-lg-outline" data-copy-prompt={prompt}>
               <span
                 class="[&>svg]:size-3.5"
                 data-copy-icon
@@ -258,48 +250,8 @@ const faqs = [
                 data-check-icon
                 set:html={checkIcon}
               />
-              <span data-copy-label>Copy prompt</span>
+              <span data-copy-label>Copy agent prompt</span>
             </button>
-            <a class="btn-lg-outline" href="/docs">View documentation</a>
-          </div>
-        </section>
-
-        <section class="border-b p-6 sm:p-16">
-          <div class="tabs w-full" id="landing-examples">
-            <nav role="tablist" aria-orientation="horizontal">
-              {
-                highlightedExamples.map((example, index) => (
-                  <button
-                    type="button"
-                    role="tab"
-                    id={`${example.id}-tab`}
-                    aria-controls={`${example.id}-panel`}
-                    aria-selected={index === 0 ? "true" : "false"}
-                    tabindex={index === 0 ? "0" : "-1"}
-                  >
-                    {example.label}
-                  </button>
-                ))
-              }
-            </nav>
-            {
-              highlightedExamples.map((example, index) => (
-                <div
-                  role="tabpanel"
-                  id={`${example.id}-panel`}
-                  aria-labelledby={`${example.id}-tab`}
-                  tabindex="-1"
-                  aria-selected={index === 0 ? "true" : "false"}
-                  hidden={index !== 0}
-                >
-                  <div
-                    class="landing-code scrollbar overflow-x-auto bg-muted p-3 sm:p-4"
-                    data-copy-code="false"
-                    set:html={example.html}
-                  />
-                </div>
-              ))
-            }
           </div>
         </section>
 
@@ -499,6 +451,13 @@ const faqs = [
     .landing-code :global(pre.shiki code) {
       display: block;
       min-width: max-content;
+      padding: 0.75rem;
+    }
+
+    @media (min-width: 40rem) {
+      .landing-code :global(pre.shiki code) {
+        padding: 1rem;
+      }
     }
 
     .feature-grid > * {

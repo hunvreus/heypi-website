@@ -20,7 +20,7 @@ First, read:
 - [heypi introduction](https://heypi.dev/docs.md)
 - [heypi quickstart](https://heypi.dev/docs/quickstart.md)
 
-Use those docs as the source of truth for what heypi is, how \`createHeypi()\` is shaped, how \`agentFrom()\` loads the Pi agent, and how state and runtime workspaces differ.
+Use those docs as the source of truth for what heypi is, how \`npm create heypi@latest\` scaffolds a project, how \`createHeypi()\` is shaped, how \`agentFrom()\` loads the Pi agent, and how state and runtime workspaces differ.
 
 When possible, use the installed package exports and TypeScript types to confirm API details instead of guessing.
 
@@ -37,18 +37,27 @@ Default to:
 - built-in just-bash unless the user needs Docker, Gondolin, or a custom [runtime provider](https://heypi.dev/docs/configuration/runtime.md);
 - no memory, scoped skills, secret requests, generated-file attachments, or scheduling unless the goal needs them;
 - approval for risky shell commands;
-- \`openai/gpt-5-mini\` unless the user chooses another Pi model/provider.
+- \`openai/gpt-5.4-mini\` unless the user chooses another Pi model/provider.
 
 Mention optional features only when relevant to the user's goal: [memory](https://heypi.dev/docs/configuration/memory.md), [skills](https://heypi.dev/docs/configuration/skills.md), [secrets](https://heypi.dev/docs/configuration/secrets.md), [attachments](https://heypi.dev/docs/configuration/attachments.md), [scheduling](https://heypi.dev/docs/configuration/scheduling.md), [tools](https://heypi.dev/docs/configuration/tools.md), and [approvals](https://heypi.dev/docs/configuration/approvals.md).
 
 ## Step 3: Build the starter
 
-Create one minimal app with:
+For a new project, prefer the official scaffolder:
+
+\`\`\`bash
+npm create heypi@latest my-agent
+cd my-agent
+\`\`\`
+
+Use the interactive answers that fit the user's goal. Use \`-- --yes\` only when defaults are correct: Slack, just-bash, default model, admin UI, and no samples.
+
+If the user is adding heypi to an existing project or explicitly wants manual setup, create one minimal app with:
 
 - \`package.json\` dependencies, including \`@hunvreus/heypi\`. Add optional runtime packages only when used, such as \`@hunvreus/heypi-runtime-docker\` or \`@hunvreus/heypi-runtime-gondolin\`.
-- \`index.ts\` with \`createHeypi()\`, one adapter, \`agentFrom()\`, and a scoped runtime root.
-- An \`agent/AGENTS.md\` prompt.
-- A \`.env.example\` listing required environment variables.
+- \`index.ts\` with \`createHeypi()\`, one adapter, \`agentFrom()\`, and a named scoped runtime root.
+- \`agent/AGENTS.md\`, \`agent/SOUL.md\`, \`agent/skills/\`, and \`tools/\` when the project does not already have them.
+- \`.env\` and \`.env.example\` listing required environment variables without filling real secret values.
 - Memory, skills, secrets, scheduling, or custom tools only when the user's goal needs them.
 
 Prefer the simplest runtime that satisfies the goal. Do not add Docker, Gondolin, or webhook GitHub automation unless the user asked for that capability.
