@@ -197,7 +197,7 @@ const commandGroups = manifest.groups
           <a
             href="/"
             hx-boost="false"
-            class="inline-flex h-full items-center px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            class="inline-flex h-full items-center px-4 text-heading-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="heypi docs"
           >
             <Logo />
@@ -508,7 +508,7 @@ const commandGroups = manifest.groups
                   {headings.map((heading) => (
                     <a
                       class:list={[
-                        "block text-muted-foreground transition-colors hover:text-[var(--heading-foreground)]",
+                        "block text-muted-foreground transition-colors hover:text-heading-foreground",
                         heading.depth === 3 && "pl-3",
                       ]}
                       href={`#${heading.id}`}

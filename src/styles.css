@@ -10,6 +10,7 @@
 @source "./**/*.{astro,ts,js}";
 
 @theme {
+  --color-heading-foreground: var(--heading-foreground);
   --font-sans:
     "JetBrains Mono", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -155,7 +156,7 @@
 }
 
 .prose a {
-  @apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:text-[var(--heading-foreground)] hover:decoration-foreground;
+  @apply underline underline-offset-2 decoration-muted-foreground/50 transition-colors hover:text-heading-foreground hover:decoration-foreground;
 }
 
 .prose ul {
