@@ -192,7 +192,11 @@ const faqs = [
       <header
         class="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6"
       >
-        <a href="/" class="flex items-center text-heading-foreground" aria-label="heypi">
+        <a
+          href="/"
+          class="flex items-center text-heading-foreground"
+          aria-label="heypi"
+        >
           <Logo />
         </a>
         <nav class="flex items-center gap-1 text-muted-foreground">
@@ -300,26 +304,29 @@ const faqs = [
               data-copy-code="false"
               set:html={agentTree}
             />
-            <ul class="grid content-start gap-3 text-sm leading-6 text-muted-foreground">
+            <ul
+              class="grid content-start gap-3 text-sm leading-6 text-muted-foreground"
+            >
               <li>
-                <strong class="font-medium text-foreground">instructions.md</strong>
-                — who the agent is and how it behaves.
+                <strong class="font-medium text-foreground"
+                  >instructions.md</strong
+                >: who the agent is and how it behaves.
               </li>
               <li>
-                <strong class="font-medium text-foreground">tools/</strong>
-                — TypeScript functions it can call.
+                <strong class="font-medium text-foreground">tools/</strong>:
+                TypeScript functions it can call.
               </li>
               <li>
-                <strong class="font-medium text-foreground">skills/</strong>
-                — runbooks it can follow on demand.
+                <strong class="font-medium text-foreground">skills/</strong>:
+                runbooks it can follow on demand.
               </li>
               <li>
-                <strong class="font-medium text-foreground">jobs/</strong>
-                — scheduled and recurring work.
+                <strong class="font-medium text-foreground">jobs/</strong>:
+                scheduled and recurring work.
               </li>
               <li>
-                <strong class="font-medium text-foreground">index.ts</strong>
-                — wiring: chat platforms, runtime, and state.
+                <strong class="font-medium text-foreground">index.ts</strong>:
+                chat platforms, runtime, and state.
               </li>
             </ul>
           </div>
@@ -374,17 +381,6 @@ const faqs = [
               ))
             }
           </section>
-        </section>
-
-        <section class="p-6 sm:p-16">
-          <h2 class="text-lg font-semibold">Build your first agent</h2>
-          <p class="mt-2 max-w-2xl text-muted-foreground">
-            Scaffold a TypeScript app in one command, then edit a few files.
-          </p>
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a class="btn-lg-primary" href="/docs/quickstart">Quickstart</a>
-            <a class="btn-lg-outline" href="/docs">Read docs</a>
-          </div>
         </section>
       </main>
     </div>
