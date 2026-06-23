@@ -12,46 +12,54 @@ Use a custom adapter for a new event source: another chat platform, an internal 
 import type { Adapter } from "@hunvreus/heypi/adapter";
 
 export const adapter: Adapter = {
-	name: "internal",
-	kind: "internal",
-	async start({ handler }) {
-		// Translate provider events into handler.message(...)
-	},
-	async send(target, output) {
-		// Send replies, approvals, progress, or attachments back.
-	},
-	async stop() {
-		// Close sockets, pollers, or HTTP clients.
-	},
+  name: "internal",
+  kind: "internal",
+  async start({ handler }) {
+    // Translate provider events into handler(...)
+  },
+  async send(target, output) {
+    // Send replies, approvals, progress, or attachments back.
+  },
+  async stop() {
+    // Close sockets, pollers, or HTTP clients.
+  },
 };
 ```
 
 Pass adapters to `createHeypi({ adapters: [...] })`. The adapter owns provider auth, event normalization, delivery, and provider-specific IDs. heypi owns turns, approvals, runtime execution, scheduling, and state.
 
+Keep custom adapters as ingress and delivery boundaries. They should verify the provider request, normalize the stable routing ids, pass useful message text and metadata to `handler(...)`, and send heypi outputs back to the same trusted destination.
+
+Do not put broad provider clients behind the adapter as model-callable tools. For example, a GitHub webhook adapter should receive issue events and route replies; a separate `agent/tools/comment_on_issue.ts` tool should own the exact GitHub write action, repository allowlist, idempotency key, and approval policy. A Slack adapter should receive mentions and send replies; a separate app tool should own any special action such as paging on-call or posting a release note.
+
+Conversation ids are routing state, not bearer tokens. If a custom route accepts `threadId` from a caller, authenticate the caller and verify they may continue that thread before calling the handler. Do not treat possession of a thread id as permission.
+
+Keep temporary provider capabilities out of normalized input and durable state. Use callback URLs, interaction tokens, and one-shot response handles inside the adapter callback, then discard them. Persist stable provider ids and delivery ids instead, so retries can be deduped without leaking credentials into the model transcript.
+
 ## Runtime provider
 
-Use a custom runtime provider for a new execution backend: a VM manager, remote container service, Cloudflare Sandbox, E2B, Daytona, or an internal runner.
+Use a custom runtime provider for a new execution backend: a VM manager, remote container service, E2B, Daytona, or an internal runner.
 
 ```ts
 import type { RuntimeProvider } from "@hunvreus/heypi/runtime";
 
 export const provider: RuntimeProvider = {
-	get(scope) {
-		return {
-			name: "internal-runtime",
-			root: scope.path,
-			async bash(input) {
-				// Execute inside the scoped backend.
-			},
-		};
-	},
-	async stop(scope) {
-		// Stop one scoped backend, or all when scope is omitted.
-	},
+  get(scope) {
+    return {
+      name: "internal-runtime",
+      root: scope.path,
+      async bash(input) {
+        // Execute inside the scoped backend.
+      },
+    };
+  },
+  async stop(scope) {
+    // Stop one scoped backend, or all when scope is omitted.
+  },
 };
 ```
 
-Configure it with [`runtime.provider`](../configuration/runtime.md). Providers receive a scoped root and may keep a container, VM, or remote workspace warm per scope. Core tools and `ctx.runtime` use the same provider.
+Configure it with [`runtime.provider`](../configuration/runtime.md). Providers receive a scoped root and may keep a container, VM, or remote workspace warm per scope. Default tools and `ctx.runtime` use the same provider.
 
 ## Attachment store
 
@@ -61,13 +69,13 @@ Use a custom attachment store when files need to live outside the runtime worksp
 import type { AttachmentStore } from "@hunvreus/heypi/attachments";
 
 export const attachments: AttachmentStore = {
-	maxBytes: 25_000_000,
-	async save(input) {
-		// Store inbound provider bytes and return an Attachment.
-	},
-	async resolve(input, scope) {
-		// Resolve an outbound attachment for upload.
-	},
+  maxBytes: 25_000_000,
+  async save(input) {
+    // Store inbound provider bytes and return an Attachment.
+  },
+  async resolve(input, scope) {
+    // Resolve an outbound attachment for upload.
+  },
 };
 ```
 
@@ -81,20 +89,20 @@ Use a custom store when SQLite is not enough, especially for multi-instance depl
 import type { Store } from "@hunvreus/heypi/store";
 
 export const store: Store = {
-	threads,
-	messages,
-	turns,
-	calls,
-	approvals,
-	locks,
-	async setup() {},
-	async transaction(fn) {
-		// Run related writes atomically.
-	},
+  threads,
+  messages,
+  turns,
+  calls,
+  approvals,
+  locks,
+  async setup() {},
+  async transaction(fn) {
+    // Run related writes atomically.
+  },
 };
 ```
 
-The store persists operational state: threads, messages, turns, calls, approvals, jobs, job runs, and locks. If scheduling is enabled, provide `jobs`, `jobRuns`, and `locks`. For multi-instance deployments, locks must be durable and shared.
+The store persists operational state: threads, messages, turns, calls, approvals, jobs, queued job runs, and locks. If scheduling is enabled, provide `jobs`, `jobRuns`, and `locks`; `jobRuns` must support queued-run claiming and active-target checks. Job run rows are both queue items and history. For multi-instance deployments, locks and queued-run claims must be durable and shared.
 
 ## Pi extensions
 

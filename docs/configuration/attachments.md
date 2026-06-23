@@ -6,11 +6,11 @@ Attachments let the agent receive user files and send generated runtime files ba
 
 ```ts
 createHeypi({
-	attachments: {
-		maxBytes: 25_000_000,
-		process: { documents: true },
-	},
-	// ...state, adapters, agent, runtime
+  attachments: {
+    maxBytes: 25_000_000,
+    process: { documents: true },
+  },
+  // ...state, adapters, agent, runtime
 });
 ```
 
@@ -34,19 +34,20 @@ Enable document conversion when the model should inspect PDFs, Office files, or 
 
 ```ts
 createHeypi({
-	attachments: {
-		process: {
-			documents: {
-				timeoutMs: 15_000,
-				maxOutputBytes: 1_000_000,
-			},
-		},
-	},
-	// ...state, adapters, agent, runtime
+  attachments: {
+    process: {
+      documents: {
+        timeoutMs: 15_000,
+        maxOutputBytes: 1_000_000,
+      },
+    },
+  },
+  // ...state, adapters, agent, runtime
 });
 ```
 
 The default converter, `heypi-convert-document`, uses [Microsoft MarkItDown](https://github.com/microsoft/markitdown) to convert supported files to Markdown.
+The built-in setup path pins MarkItDown to `0.1.6`; set `HEYPI_CONVERT_MARKITDOWN_PACKAGE` if you need to test or operate a different version.
 
 Requirements:
 
@@ -62,7 +63,7 @@ npx heypi-convert-document --setup
 Without `uv`, install MarkItDown yourself:
 
 ```bash
-python3 -m pip install "markitdown[pdf,docx,pptx,xlsx]"
+python3 -m pip install "markitdown[pdf,docx,pptx,xlsx]==0.1.6"
 ```
 
 Default converted extensions are `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.xls`, `.xlsx`, and `.epub`.
@@ -85,8 +86,8 @@ Converter options:
 The `attach` core tool marks a runtime file for upload with the final reply. Files must stay inside the active runtime scope.
 
 ```ts
-agentFrom("./agent", {
-	tools: [...coreTools({ attach: true })],
+loadAgent("./agent", {
+  builtinTools: defaultTools({ attach: true }),
 });
 ```
 

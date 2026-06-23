@@ -20,7 +20,7 @@ First, read:
 - [heypi introduction](https://heypi.dev/docs.md)
 - [heypi quickstart](https://heypi.dev/docs/quickstart.md)
 
-Use those docs as the source of truth for what heypi is, how \`npm create heypi@latest\` scaffolds a project, how \`createHeypi()\` is shaped, how \`agentFrom()\` loads the Pi agent, and how state and runtime workspaces differ.
+Use those docs as the source of truth for what heypi is, how \`npm create heypi@latest\` scaffolds a project, how \`createHeypi()\` is shaped, how \`loadAgent()\` loads the Pi agent, and how state and runtime workspaces differ.
 
 When possible, use the installed package exports and TypeScript types to confirm API details instead of guessing.
 
@@ -55,8 +55,8 @@ Use the interactive answers that fit the user's goal. Use \`-- --yes\` only when
 If the user is adding heypi to an existing project or explicitly wants manual setup, create one minimal app with:
 
 - \`package.json\` dependencies, including \`@hunvreus/heypi\`. Add optional runtime packages only when used, such as \`@hunvreus/heypi-runtime-docker\` or \`@hunvreus/heypi-runtime-gondolin\`.
-- \`index.ts\` with \`createHeypi()\`, one adapter, \`agentFrom()\`, and a named scoped runtime root.
-- \`agent/AGENTS.md\`, \`agent/SOUL.md\`, \`agent/skills/\`, and \`tools/\` when the project does not already have them.
+- \`index.ts\` with \`createHeypi()\`, one adapter, \`loadAgent()\`, and a named scoped runtime root.
+- \`agent/instructions.md\`, optional \`agent/system.md\`, \`agent/tools/\`, \`agent/jobs/\`, \`agent/skills/\`, and root \`evals/\` when the project does not already have them.
 - \`.env\` and \`.env.example\` listing required environment variables without filling real secret values.
 - Memory, skills, secrets, scheduling, or custom tools only when the user's goal needs them.
 
@@ -68,7 +68,7 @@ Run the most relevant checks available in the project:
 
 - install dependencies if needed;
 - typecheck or build;
-- run \`npx @hunvreus/heypi check\` when the app config is present;
+- run \`npx @hunvreus/heypi doctor\` for static diagnostics, and \`npx @hunvreus/heypi doctor --boot\` when env, database, or runtime path checks are configured;
 - explain any validation that could not be run because credentials are missing.
 
 ## Reference docs

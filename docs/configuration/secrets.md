@@ -6,9 +6,9 @@ Secret requests let the agent ask for credentials without putting plaintext secr
 
 ```ts
 createHeypi({
-	state: { root: "./state" },
-	// ...adapters, agent, runtime
-	secrets: true,
+  state: { root: "./state" },
+  // ...adapters, agent, runtime
+  secrets: true,
 });
 ```
 
@@ -26,11 +26,11 @@ When enabled, heypi exposes `secret_request`. The agent passes a reason and one 
 
 ```ts
 {
-	reason: "Need a GitHub token to inspect private workflow logs.",
-	fields: [
-		{ name: "GITHUB_TOKEN", label: "GitHub token" },
-		{ name: "GITHUB_OWNER" },
-	],
+  reason: "Need a GitHub token to inspect private workflow logs.",
+  fields: [
+    { name: "GITHUB_TOKEN", label: "GitHub token" },
+    { name: "GITHUB_OWNER" },
+  ],
 }
 ```
 
@@ -42,6 +42,10 @@ heypi returns a browser link. The user opens it, enters the values, encrypts the
 ```
 
 The encrypted blob is intercepted before the normal model turn, so it is not stored as chat history and is not sent to the model.
+
+Pending requests are process-local. If the heypi process restarts before the user replies, the link is invalid and the agent must request a fresh secret link.
+
+Saved values are runtime files, not database rows, memory entries, or workspace records. Their durability follows the configured runtime workspace and deployment backup strategy.
 
 ## Self-hosting
 
@@ -57,17 +61,19 @@ To self-host the page from your own heypi app:
 
 ```ts
 createHeypi({
-	state: { root: "./state" },
-	// ...adapters, agent, runtime
-	http: { host: "0.0.0.0", port: 3000 },
-	secrets: {
-		url: "https://203-0-113-10.sslip.io/secret",
-		serve: true,
-	},
+  state: { root: "./state" },
+  // ...adapters, agent, runtime
+  http: { host: "0.0.0.0", port: 3000 },
+  secrets: {
+    url: "https://203-0-113-10.sslip.io/secret",
+    serve: true,
+  },
 });
 ```
 
 `secrets.url` is the public URL placed in chat. With `serve: true`, heypi serves the static page at that URL's path. It also serves the stylesheet at `<path>.css`. Use HTTPS for real secrets.
+
+Self-hosted secret pages need a stable URL. Avoid `http.port: 0` for self-hosted secrets unless another layer provides a stable public URL and forwards to the selected local port. For local development, either use a fixed local port that matches `secrets.url`, or omit `serve` and use the hosted page.
 
 ## Security model
 

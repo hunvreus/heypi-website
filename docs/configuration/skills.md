@@ -2,7 +2,7 @@
 
 Skills are small durable procedures for one scope. They are useful for runbooks, repeated channel workflows, service-specific investigation steps, and local conventions that should survive future turns.
 
-**This page covers managed skills: scoped skills the agent can create and update at runtime. Bundled skills in `agent/skills/` ship with the app and are loaded by `agentFrom()`; see [Agent configuration](agent.md#prompt-files).**
+**This page covers managed skills: scoped skills the agent can create and update at runtime. Bundled skills in `agent/skills/` ship with the app and are loaded by `loadAgent()`; see [Agent configuration](agent.md#instruction-files).**
 
 ## Config
 
@@ -10,14 +10,19 @@ Managed skills are off by default.
 
 ```ts
 createHeypi({
-	state: { root: "./state" },
-	// ...adapters, agent, runtime
-	approval: { approvers: { users: ["U123456"], groups: ["S123456"] } },
-	skills: {
-		enabled: true,
-		scope: "channel",
-		writePolicy: "approvers",
-	},
+  state: { root: "./state" },
+  // ...adapters, agent, runtime
+  adapters: [
+    slack({
+      // ...Slack auth and delivery config
+      permissions: { approvers: { users: ["U123456"], groups: ["S123456"] } },
+    }),
+  ],
+  skills: {
+    enabled: true,
+    scope: "channel",
+    writePolicy: "approvers",
+  },
 });
 ```
 
@@ -74,7 +79,7 @@ Use `skill_patch` for exact replacements inside an existing skill. Ambiguous rep
 
 Defaults:
 
-- when `approval.approvers` is configured: `approvers` for `channel` and `user`.
+- when adapter approvers or admins are configured: `approvers` for `channel` and `user`.
 - without approvers: `off`.
 - `adapter` and `agent`: `off` unless explicitly overridden.
 

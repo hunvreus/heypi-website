@@ -46,45 +46,69 @@ const highlightedInstallCommands = await Promise.all(
   })),
 );
 
+const agentTree = await codeToHtml(
+  `my-agent/
+├─ index.ts
+└─ agent/
+   ├─ instructions.md
+   ├─ tools/
+   ├─ skills/
+   └─ jobs/`,
+  {
+    lang: "text",
+    themes: { light: "vesper", dark: "vesper" },
+    defaultColor: false,
+  },
+);
+
 const features = [
-  ["Adapters", "Run agents in Slack, Discord, Telegram, or webhook workflows."],
   [
-    "Runtime tools",
-    "Expose command, file, search, and attachment tools through a scoped runtime.",
+    "Chat platforms",
+    "Add Slack, Discord, Telegram, or a trusted webhook. One agent, shared by everyone.",
   ],
   [
-    "Runtime providers",
-    "Use built-in just-bash or plug in Docker, Gondolin, or a custom provider.",
+    "Approvals",
+    "Gate sensitive actions behind human approval, with named approvers for your team.",
   ],
-  ["Approvals", "Require human approval before sensitive tools continue."],
   [
     "Audit trail",
-    "Persist turns, calls, approvals, results, and failures in SQLite.",
+    "Record every turn, tool call, approval, and result in SQLite. Know who asked for what.",
   ],
   [
-    "Scoped memory",
-    "Keep durable notes scoped by channel, user, thread, adapter, or agent.",
+    "Files & commands",
+    "Let the agent read and write files, run commands, and search a scoped workspace.",
   ],
-  ["Skills", "Let agents manage scoped runbooks and reusable instructions."],
   [
-    "Secret requests",
-    "Collect secrets through encrypted handoff instead of plain chat.",
+    "Sandboxing",
+    "Run those commands in built-in just-bash, or a Docker, Gondolin, or custom sandbox.",
+  ],
+  [
+    "Memory",
+    "Keep durable notes, scoped by channel, user, thread, adapter, or agent.",
+  ],
+  [
+    "Skills",
+    "Let the agent build and reuse runbooks and standing instructions.",
+  ],
+  [
+    "Secrets",
+    "Collect credentials through an encrypted handoff, never pasted in chat.",
   ],
   [
     "Scheduling",
-    "Run cron jobs and heartbeat follow-ups against explicit targets.",
+    "Run cron jobs and heartbeat check-ins against explicit channels and users.",
   ],
   [
-    "Admin UI",
-    "Inspect chats, calls, approvals, memory, jobs, runs, and configuration.",
+    "File attachments",
+    "Receive files from chat and send generated files back.",
   ],
   [
-    "Attachments",
-    "Let agents receive files and attach generated files back to chat.",
+    "Admin panel",
+    "Inspect chats, calls, approvals, memory, jobs, and config in one place.",
   ],
   [
     "Custom tools",
-    "Add trusted TypeScript tools for your app, data, APIs, and workflows.",
+    "Add trusted TypeScript tools for your own apps, data, and APIs.",
   ],
 ];
 
@@ -92,12 +116,17 @@ const faqs = [
   {
     question: "What is heypi?",
     answer:
-      'heypi is a TypeScript framework for running <a href="https://pi.dev">Pi</a> agents in Slack, Discord, Telegram, and webhook workflows. It gives the agent chat adapters, scoped runtime tools, durable state, approvals, memory, skills, secrets, jobs, and an admin UI.',
+      'heypi is a TypeScript framework for multiplayer chat agents: one <a href="https://pi.dev">Pi</a> agent your whole team uses in Slack, Discord, Telegram, and trusted webhook entrypoints, with approvals, audit trails, scoped runtime tools, memory, secrets, jobs, and an admin UI.',
   },
   {
     question: "How do I use heypi?",
     answer:
-      "Run <code>npm create heypi@latest</code>. It scaffolds a TypeScript app, prompts for adapter, runtime, and model, writes starter agent files, and prepares environment placeholders. You can still build the same app manually with <code>createHeypi()</code>, <code>agentFrom()</code>, and an adapter.",
+      "Run <code>npm create heypi@latest</code>. It scaffolds a TypeScript app, prompts for adapter, runtime, and model, writes starter agent files, and prepares environment placeholders. You can still build the same app manually with <code>createHeypi()</code>, <code>loadAgent()</code>, and an adapter.",
+  },
+  {
+    question: "Is heypi a workflow platform?",
+    answer:
+      "No. heypi is optimized for chat-ops agents with governed tool access. It records interrupted work during startup recovery, but it does not replay arbitrary in-flight agent turns after a process crash.",
   },
   {
     question: "What can I connect it to?",
@@ -142,7 +171,7 @@ const faqs = [
   {
     question: "Why did you build this?",
     answer:
-      "Local, capability-first agents are useful, but team chat needs extra controls: channel adapters, scoped context, runtime boundaries, approvals, audit logs, secret handoff, and operations. heypi packages those pieces around Pi.",
+      "Most AI assistants are single-player: one person, one private chat. Teams need something different. A shared agent in a shared channel needs channel adapters, scoped context, runtime boundaries, approvals, audit logs, and secret handoff. heypi packages those pieces around Pi.",
   },
   {
     question: "How can I help?",
@@ -154,7 +183,7 @@ const faqs = [
 
 <Site
   title="heypi"
-  description="AI assistants for team chat, with sandboxed commands and approval flows."
+  description="A multiplayer chat agent for your team. One AI agent in Slack, Discord, and Telegram, with approvals, an audit trail, and sandboxed tools."
 >
   <div class="min-h-screen bg-background text-foreground">
     <div
@@ -188,13 +217,13 @@ const faqs = [
       <main>
         <section class="border-b p-6 sm:p-16">
           <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Multiplayer AI agents for your team.
+            A multiplayer chat agent for your team.
           </h1>
           <p class="mt-4 text-muted-foreground sm:text-lg">
-            heypi is a lightweight framework to create AI assistants that
-            interact with your whole team on Slack, Discord, etc. It keeps
-            things safe with sandboxed commands and approval flows for sensitive
-            actions.
+            Most AI assistants are single-player. heypi puts one agent in your
+            team's Slack, Discord, or Telegram, with sandboxed tools, approvals,
+            and an audit trail for anything sensitive. An app you own, not a
+            workflow platform.
           </p>
           <div class="tabs mt-8 w-full" id="landing-install">
             <nav
@@ -260,7 +289,49 @@ const faqs = [
         </section>
 
         <section class="border-b p-6 sm:p-16">
-          <div class="feature-grid grid sm:grid-cols-2 md:grid-cols-3">
+          <h2 class="text-lg font-semibold">Your agent is just files</h2>
+          <p class="mt-2 max-w-2xl text-muted-foreground">
+            No dashboard to configure. An agent is a folder you edit and commit
+            to git. The scaffolder writes it for you.
+          </p>
+          <div class="mt-8 grid gap-8 md:grid-cols-2 md:items-center">
+            <div
+              class="landing-code scrollbar overflow-x-auto rounded-md border bg-muted"
+              set:html={agentTree}
+            />
+            <ul class="grid content-start gap-3 text-sm leading-6 text-muted-foreground">
+              <li>
+                <strong class="font-medium text-foreground">instructions.md</strong>
+                — who the agent is and how it behaves.
+              </li>
+              <li>
+                <strong class="font-medium text-foreground">tools/</strong>
+                — TypeScript functions it can call.
+              </li>
+              <li>
+                <strong class="font-medium text-foreground">skills/</strong>
+                — runbooks it can follow on demand.
+              </li>
+              <li>
+                <strong class="font-medium text-foreground">jobs/</strong>
+                — scheduled and recurring work.
+              </li>
+              <li>
+                <strong class="font-medium text-foreground">index.ts</strong>
+                — wiring: chat platforms, runtime, and state.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="border-b p-6 sm:p-16">
+          <h2 class="text-lg font-semibold">Everything a shared agent needs</h2>
+          <p class="mt-2 max-w-2xl text-muted-foreground">
+            heypi wraps a Pi agent with what a team actually needs: a place in
+            chat, governed tools, durable state, and a record of everything it
+            does.
+          </p>
+          <div class="feature-grid mt-8 grid sm:grid-cols-2 md:grid-cols-3">
             {
               features.map(([title, description]) => (
                 <div>
@@ -302,6 +373,17 @@ const faqs = [
               ))
             }
           </section>
+        </section>
+
+        <section class="p-6 sm:p-16">
+          <h2 class="text-lg font-semibold">Build your first agent</h2>
+          <p class="mt-2 max-w-2xl text-muted-foreground">
+            Scaffold a TypeScript app in one command, then edit a few files.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a class="btn-lg-primary" href="/docs/quickstart">Quickstart</a>
+            <a class="btn-lg-outline" href="/docs">Read docs</a>
+          </div>
         </section>
       </main>
     </div>

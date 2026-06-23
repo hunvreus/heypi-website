@@ -11,30 +11,42 @@ npm install @hunvreus/heypi
 ## Step 2: create `index.ts`
 
 ```ts
-import { agentFrom, createHeypi, runHeypi, slack, workspace } from "@hunvreus/heypi";
+import { createHeypi, loadAgent, slack, workspace } from "@hunvreus/heypi";
 
-const app = createHeypi({
-	state: { root: "./state" },
-	adapters: [
-		slack({
-			botToken: process.env.SLACK_BOT_TOKEN!,
-			appToken: process.env.SLACK_APP_TOKEN!,
-		}),
-	],
-	agent: agentFrom("./agent", { model: "openai/gpt-5.4-mini" }),
-	runtime: { name: "just-bash", root: workspace("./workspace") },
+export default createHeypi({
+  state: { root: "./state" },
+  adapters: [
+    slack({
+      mode: "socket",
+    }),
+  ],
+  agent: loadAgent("./agent", { model: "openai/gpt-5.4-mini" }),
+  runtime: { name: "just-bash", root: workspace("./workspace") },
 });
-
-await runHeypi(app);
 ```
 
 ## Step 3: create agent files
 
 ```bash
-mkdir -p agent/skills tools
-printf "You are a concise team assistant.\n" > agent/AGENTS.md
-printf "Answer directly and accurately.\n" > agent/SOUL.md
+mkdir -p agent/skills agent/tools agent/jobs evals
+printf "You are a concise team assistant. Answer directly and accurately.\n" > agent/instructions.md
 ```
+
+Optional starter tool:
+
+```ts
+// agent/tools/now.ts
+import { defineTool } from "@hunvreus/heypi/authoring";
+import { z } from "zod";
+
+export default defineTool({
+  description: "Return the current ISO timestamp.",
+  input: z.object({}),
+  run: async () => new Date().toISOString(),
+});
+```
+
+`loadAgent("./agent", ...)` discovers that file automatically. The app entrypoint keeps using `@hunvreus/heypi`; files under `agent/` use `@hunvreus/heypi/authoring`.
 
 ## Step 4: create `.env`
 
@@ -51,14 +63,16 @@ Use the [Slack setup guide](../adapters/slack.md#setup) to create the app, enabl
 ## Step 6: run it
 
 ```bash
-npm run dev
+heypi dev
 ```
 
-Mention the bot in a test channel.
+Use the printed admin URL or `POST /dev/messages` to test locally. If the Slack adapter is configured for Socket Mode and `.env.local` contains dev bot credentials, `heypi dev` also starts the real Slack adapter.
 
 ## Config notes
 
 - `state.root` stores durable heypi state.
-- `slack(...)` registers the Slack adapter.
-- `agentFrom("./agent", ...)` loads `agent/AGENTS.md`, `agent/SOUL.md`, and bundled skills.
+- `heypi dev` starts configured adapters, loads `.env` plus `.env.local`, enables admin by default, and adds loopback-only local test routes.
+- `heypi start` starts configured adapters, loads `.env`, and does not add admin or local test routes unless configured.
+- `loadAgent("./agent", ...)` loads `agent/instructions.md`, default built-in tools, bundled skills, app tools, and jobs.
+- `evals/` is discovered by `heypi eval`.
 - `runtime.root` is the workspace for runtime tools, generated files, and scoped runtime state.

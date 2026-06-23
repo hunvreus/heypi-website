@@ -6,15 +6,15 @@ Memory is small durable background context, not a transcript database or trusted
 
 ```ts
 createHeypi({
-	state: { root: "./state" },
-	// ...adapters, agent, runtime
-	scope: "channel",
-	memory: {
-		enabled: true,
-		scope: "user",
-		writePolicy: "approvers",
-		maxChars: 4000,
-	},
+  state: { root: "./state" },
+  // ...adapters, agent, runtime
+  scope: "channel",
+  memory: {
+    enabled: true,
+    scope: "user",
+    writePolicy: "approvers",
+    maxChars: 4000,
+  },
 });
 ```
 
@@ -79,7 +79,7 @@ DMs use the same rules as other chats: `channel` memory follows the provider cha
 
 Defaults:
 
-- when `approval.approvers` is configured: `approvers`.
+- when adapter approvers or admins are configured: `approvers`.
 - without approvers, `channel` and `user`: `auto`.
 - without approvers, `adapter` and `agent`: `off`.
 
