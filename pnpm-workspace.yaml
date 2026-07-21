@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - reallysimpledocs@1.0.9
+  - reallysimpledocs@1.0.10
+  - reallysimpledocs@1.0.11
+  - reallysimpledocs@1.0.12
+  - reallysimpledocs@1.0.13

@@ -1,4 +1,4 @@
-import { getPages } from "@/lib/docs";
+import { getDocsPages } from "@/lib/docs-menu";
 
 const site = "https://heypi.dev";
 
@@ -9,7 +9,7 @@ function url(path: string): string {
 export function GET() {
 	const paths = [
 		"/",
-		...getPages().map((page) => `/docs${page.slug ? `/${page.slug}` : ""}/`),
+		...getDocsPages().map((page) => page.path),
 	];
 
 	const body = `<?xml version="1.0" encoding="UTF-8"?>

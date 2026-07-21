@@ -8,6 +8,8 @@ interface Props {
   type?: "website" | "article";
 }
 
+import basecoatJsUrl from "basecoat-css/all.min?url";
+
 const {
   title,
   description = "Chat agents for your team, with approvals and sandboxed tools.",
@@ -66,10 +68,7 @@ const pageTitle =
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:image:alt" content={imageAlt} />
     <meta name="twitter:creator" content={creatorHandle} />
-    <link rel="stylesheet" href="/assets/styles.css" />
-    <script is:inline src="/assets/basecoat.min.js" defer></script>
-    <script is:inline src="/assets/htmx.min.js" defer></script>
-    <script is:inline src="/assets/copy-code.js" defer></script>
+    <script src={basecoatJsUrl} defer></script>
   </head>
   <body class="bg-background text-foreground">
     <slot />

@@ -1,10 +1,8 @@
-import { getDocMarkdown, getPages } from "@/lib/docs";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 export function GET() {
-	const page = getPages().find((item) => item.slug === "");
-	if (!page) return new Response("Not found", { status: 404 });
-
-	return new Response(getDocMarkdown(page), {
+	return new Response(readFileSync(resolve(process.cwd(), "docs/index.md"), "utf8"), {
 		headers: {
 			"content-type": "text/markdown; charset=utf-8",
 		},

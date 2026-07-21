@@ -1,172 +1,176 @@
 {
 	"title": "heypi",
-	"description": "Team chat agents with approvals, audit, and sandboxed tools.",
+	"description": "Pi-native chat adapters for team agents.",
 	"source": {
 		"repo": "https://github.com/hunvreus/heypi",
 		"branch": "main",
 		"base": "packages/heypi"
 	},
-	"groups": [
+	"menu": [
 		{
-			"title": "Getting started",
-			"pages": [
+			"type": "group",
+			"label": "Getting started",
+			"items": [
 				{
-					"title": "Introduction",
-					"slug": "",
-					"file": "index.md",
+					"type": "item",
+					"label": "Introduction",
+					"slug": "index",
 					"icon": "info"
 				},
 				{
-					"title": "Quickstart",
-					"slug": "quickstart",
-					"file": "quickstart/index.md",
+					"type": "item",
+					"label": "Quickstart",
+					"slug": "getting-started/index",
 					"icon": "zap"
-				},
-				{
-					"title": "Manual setup",
-					"slug": "quickstart/manual",
-					"file": "quickstart/manual.md",
-					"icon": "wrench"
 				}
 			]
 		},
 		{
-			"title": "Configuration",
-			"pages": [
+			"type": "group",
+			"label": "Configuration",
+			"items": [
 				{
-					"title": "Overview",
-					"slug": "configuration",
-					"file": "configuration/index.md"
+					"type": "item",
+					"label": "Overview",
+					"slug": "configuration/index"
 				},
 				{
-					"title": "Agent",
-					"slug": "configuration/agent",
-					"file": "configuration/agent.md"
+					"type": "item",
+					"label": "Agent",
+					"slug": "configuration/agent"
 				},
 				{
-					"title": "Tools",
-					"slug": "configuration/tools",
-					"file": "configuration/tools.md"
+					"type": "item",
+					"label": "Runtimes",
+					"slug": "configuration/runtimes"
 				},
 				{
-					"title": "Runtime",
-					"slug": "configuration/runtime",
-					"file": "configuration/runtime.md"
+					"type": "item",
+					"label": "Tools",
+					"slug": "configuration/tools"
 				},
 				{
-					"title": "HTTP listener",
-					"slug": "configuration/http",
-					"file": "configuration/http.md"
+					"type": "item",
+					"label": "Approvals",
+					"slug": "configuration/approvals"
 				},
 				{
-					"title": "Scope",
-					"slug": "configuration/scope",
-					"file": "configuration/scope.md"
+					"type": "item",
+					"label": "Access",
+					"slug": "configuration/access"
 				},
 				{
-					"title": "Approvals",
-					"slug": "configuration/approvals",
-					"file": "configuration/approvals.md"
+					"type": "item",
+					"label": "Conversation behavior",
+					"slug": "configuration/activity"
 				},
 				{
-					"title": "Task behavior",
-					"slug": "configuration/task",
-					"file": "configuration/task.md"
+					"type": "item",
+					"label": "Memory",
+					"slug": "configuration/memory"
 				},
 				{
-					"title": "Attachments",
-					"slug": "configuration/attachments",
-					"file": "configuration/attachments.md"
+					"type": "item",
+					"label": "Attachments",
+					"slug": "configuration/attachments"
 				},
 				{
-					"title": "Memory",
-					"slug": "configuration/memory",
-					"file": "configuration/memory.md"
+					"type": "item",
+					"label": "Secrets",
+					"slug": "configuration/secrets"
 				},
 				{
-					"title": "Skills",
-					"slug": "configuration/skills",
-					"file": "configuration/skills.md"
+					"type": "item",
+					"label": "Scheduling",
+					"slug": "configuration/scheduling"
 				},
 				{
-					"title": "Secrets",
-					"slug": "configuration/secrets",
-					"file": "configuration/secrets.md"
-				},
-				{
-					"title": "Scheduling",
-					"slug": "configuration/scheduling",
-					"file": "configuration/scheduling.md"
-				},
-				{
-					"title": "Admin",
-					"slug": "configuration/admin",
-					"file": "configuration/admin.md"
+					"type": "item",
+					"label": "Admin and audit",
+					"slug": "configuration/admin"
 				}
 			]
 		},
 		{
-			"title": "Adapters",
-			"pages": [
+			"type": "group",
+			"label": "Adapters",
+			"items": [
 				{
-					"title": "Overview",
-					"slug": "adapters",
-					"file": "adapters/index.md"
+					"type": "item",
+					"label": "Overview",
+					"slug": "adapters/index"
 				},
 				{
-					"title": "Slack",
-					"slug": "adapters/slack",
-					"file": "adapters/slack.md"
+					"type": "item",
+					"label": "Slack",
+					"slug": "adapters/slack"
 				},
 				{
-					"title": "Discord",
-					"slug": "adapters/discord",
-					"file": "adapters/discord.md"
+					"type": "item",
+					"label": "Discord",
+					"slug": "adapters/discord"
 				},
 				{
-					"title": "Telegram",
-					"slug": "adapters/telegram",
-					"file": "adapters/telegram.md"
+					"type": "item",
+					"label": "Telegram",
+					"slug": "adapters/telegram"
 				},
 				{
-					"title": "Webhook",
-					"slug": "adapters/webhook",
-					"file": "adapters/webhook.md"
+					"type": "item",
+					"label": "Webhook",
+					"slug": "adapters/webhook"
+				},
+				{
+					"type": "item",
+					"label": "Local",
+					"slug": "adapters/local"
 				}
 			]
 		},
 		{
-			"title": "Guides",
-			"pages": [
+			"type": "group",
+			"label": "Guides",
+			"items": [
 				{
-					"title": "Deployment",
-					"slug": "guides/deployment",
-					"file": "guides/deployment.md"
+					"type": "item",
+					"label": "Deployment",
+					"slug": "guides/deployment"
 				},
 				{
-					"title": "Migration",
-					"slug": "guides/migration",
-					"file": "guides/migration.md"
+					"type": "item",
+					"label": "Custom tools",
+					"slug": "guides/custom-tools"
 				},
 				{
-					"title": "Custom integrations",
-					"slug": "guides/integrations",
-					"file": "guides/integrations.md"
+					"type": "item",
+					"label": "Custom adapters",
+					"slug": "guides/custom-adapters"
+				},
+				{
+					"type": "item",
+					"label": "Custom runtimes",
+					"slug": "guides/custom-runtimes"
 				}
 			]
 		},
 		{
-			"title": "Reference",
-			"pages": [
+			"type": "group",
+			"label": "Reference",
+			"items": [
 				{
-					"title": "API",
-					"slug": "reference/api",
-					"file": "reference/api.md"
+					"type": "item",
+					"label": "API",
+					"slug": "reference/index"
 				},
 				{
-					"title": "CLI",
-					"slug": "reference/cli",
-					"file": "reference/cli.md"
+					"type": "item",
+					"label": "CLI",
+					"slug": "reference/cli"
+				},
+				{
+					"type": "item",
+					"label": "Architecture",
+					"slug": "reference/architecture"
 				}
 			]
 		}

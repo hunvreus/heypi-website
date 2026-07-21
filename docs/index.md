@@ -1,44 +1,100 @@
 # Introduction
 
-heypi is a TypeScript framework for governed AI agents in team chat. It runs [Pi](https://pi.dev) agents in Slack, Discord, Telegram, and trusted webhook entrypoints, with approvals, audit trails, scoped runtime tools, memory, secret handoff, scheduling, and an admin panel.
+heypi is a TypeScript framework for running a shared [Pi](https://pi.dev) agent in Slack,
+Discord, Telegram, local applications, or trusted webhook workflows.
 
-The core product focus is chat-ops: give an agent useful access to your team's tools while keeping sensitive actions reviewable and visible.
+## Why heypi?
 
-## What heypi is for
+[OpenClaw](https://openclaw.ai/) introduced two useful ideas:
 
-- Shared agents that work in team channels instead of one user's local terminal.
-- Operations, support, project, and internal tooling agents that need trusted TypeScript tools or shell/file access.
-- Use cases where approvals, bypasses, tool calls, failures, and chat context need an audit trail.
-- Long-running Node.js services owned by your team, with persistent SQLite state and workspace files.
+- **Local first**: run close to the user's tools, files, CLIs, browser sessions, and credentials
+  instead of rebuilding every integration as a hosted connector.
+- **Capabilities over workflows**: give the agent instructions, skills, and tools, then let the model
+  decide how to use them instead of forcing each task into a predefined workflow.
 
-## What heypi is not
+That model becomes more difficult when an agent is shared by a team. heypi adds the missing
+boundaries:
 
-heypi is not a serverless workflow platform or durable replay engine. It records interrupted work during startup recovery, but it does not replay arbitrary in-flight agent turns after a process crash. For production, run one supervised heypi process per app/store and keep `state` and `workspace` on persistent storage.
+- **Conversation identity**: keep DMs, channel conversations, native threads, and reply chains
+  separate while preserving useful continuity.
+- **Approvals**: require specific users or groups to approve sensitive tool calls.
+- **Runtime isolation**: execute commands through host, Docker, Gondolin, just-bash, Vercel
+  Sandbox, Cloudflare Sandbox, or a custom runtime.
+- **Accountability**: retain conversation events, approvals, schedule runs, and Pi session
+  transcripts on infrastructure you control.
+
+For example, [Codex Tag](https://github.com/hunvreus/heypi/tree/main/examples/codex-tag) turns Pi
+into a shared coding agent. A teammate can mention it with an issue or repository, steer the active
+turn, approve sensitive actions, and receive the result in the same conversation.
 
 ## How it works
 
-- Add adapters for [Slack](adapters/slack.md), [Discord](adapters/discord.md), [Telegram](adapters/telegram.md), or [webhooks](adapters/webhook.md).
-- Load an agent from `agent/instructions.md`, [tools](configuration/tools.md), [skills](configuration/skills.md), jobs, and optional extensions.
-- Persist discussions, actors, turns, calls, approvals, bypasses, memory, and jobs in SQLite.
-- Run command, file, search, and attachment tools through scoped runtimes such as just-bash, Docker, Gondolin, or a custom provider.
-- Enforce approval rules before sensitive tools continue, then expose the trace in chat and admin.
+Pi remains the agent runtime. It owns model execution, sessions, transcripts, compaction, retries,
+tools, and extensions. heypi adds the team-facing layer around it:
 
-For example, the [Slack DevOps agent example](https://github.com/hunvreus/heypi/tree/main/examples/slack-devops) gives an AI agent access to servers through host tools. A safe request, such as "What is the load on db-1?", can run without approval. A risky request, such as running a database migration, can require approval from a specific user or group.
+- Adapters translate Slack, Discord, Telegram, local, and webhook events into one conversation
+  model.
+- Agent folders provide instructions, tools, skills, schedules, and other staged resources.
+- Runtime providers expose model-visible `/workspace`, `/shared`, and `/agent` roots without leaking
+  host paths.
+- Approval policies gate sensitive tool calls before execution.
+- Small append-only records coordinate queues, approvals, schedules, cancellation, and recovery.
 
-Read more in the [configuration guide](configuration/index.md).
+Configuration stays in code:
+
+```ts
+import { host, loadAgent, modelFromEnv, runHeypi, slack } from "@hunvreus/heypi";
+
+const agent = loadAgent("./agent", {
+	model: modelFromEnv(),
+	runtime: host({ workspace: "./workspace" }),
+});
+
+await runHeypi(agent, [
+	slack({
+		token: process.env.SLACK_BOT_TOKEN!,
+		appToken: process.env.SLACK_APP_TOKEN!,
+	}),
+]);
+```
+
+heypi is not a workflow builder or a second model runtime. It keeps the coordination layer small
+and delegates agent behavior to Pi.
+
+## Project layout
+
+A small heypi app is just files:
+
+```text
+my-agent/
+├── index.ts
+├── .env
+└── agent/
+    ├── instructions.md
+    ├── system.md
+    ├── tools/
+    ├── skills/
+    ├── extensions/
+    └── schedules/
+```
+
+- `index.ts` wires the agent, runtime, state, and adapters.
+- `agent/instructions.md` defines stable agent behavior.
+- `agent/system.md` is optional low-level system context.
+- `agent/tools/` and `agent/extensions/` hold Pi-native authored capabilities.
+- `agent/skills/` holds procedures Pi loads when relevant.
+- `agent/schedules/` holds trusted cron modules loaded by heypi.
+
+Start with the generated app. Add folders only when the agent needs that capability.
 
 ## Get started
 
-Follow the [quickstart](quickstart/index.md) to run a minimal Slack bot, then read [configuration](configuration/index.md) for the main app-level knobs. You can also try one of the examples:
-
-- [`slack-devops`](https://github.com/hunvreus/heypi/tree/main/examples/slack-devops): Slack operations agent with SSH host tools, approvals, memory, secrets, and runbooks.
-- [`discord-gondolin`](https://github.com/hunvreus/heypi/tree/main/examples/discord-gondolin): Discord project assistant with Gondolin runtime, channel scope, skills, secrets, and generated-file attachments.
-- [`telegram-workout`](https://github.com/hunvreus/heypi/tree/main/examples/telegram-workout): Telegram fitness coach with scoped memory and scheduled check-ins.
-- [`webhook-github-docker`](https://github.com/hunvreus/heypi/tree/main/examples/webhook-github-docker): Webhook automation that investigates GitHub issues in Docker and comments back through trusted tools.
+Follow the [quickstart](/docs/getting-started/) to create a Codex Tag agent, then read the
+[configuration](/docs/configuration/) and [adapters](/docs/adapters/) docs.
 
 ## How can I help?
 
-heypi is 100% free and open source:
+heypi is free and open source:
 
 - [Star it on GitHub](https://github.com/hunvreus/heypi)
 - [Report bugs or request features](https://github.com/hunvreus/heypi/issues)

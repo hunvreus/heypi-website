@@ -13,22 +13,22 @@ const installCommands = [
   {
     id: "npm",
     label: "npm",
-    code: "npm create heypi@latest my-agent",
+    code: "npm create heypi@latest -- codex-tag my-agent",
   },
   {
     id: "pnpm",
     label: "pnpm",
-    code: "pnpm create heypi@latest my-agent",
+    code: "pnpm create heypi@latest codex-tag my-agent",
   },
   {
     id: "yarn",
     label: "Yarn",
-    code: "yarn create heypi my-agent",
+    code: "yarn create heypi codex-tag my-agent",
   },
   {
     id: "bun",
     label: "Bun",
-    code: "bun create heypi my-agent",
+    code: "bun create heypi codex-tag my-agent",
   },
 ];
 
@@ -38,8 +38,8 @@ const highlightedInstallCommands = await Promise.all(
     html: await codeToHtml(command.code, {
       lang: "bash",
       themes: {
-        light: "vesper",
-        dark: "vesper",
+        light: "min-light",
+        dark: "min-dark",
       },
       defaultColor: false,
     }),
@@ -53,10 +53,10 @@ const agentTree = await codeToHtml(
    ├─ instructions.md
    ├─ tools/
    ├─ skills/
-   └─ jobs/`,
+   └─ schedules/`,
   {
     lang: "text",
-    themes: { light: "vesper", dark: "vesper" },
+    themes: { light: "min-light", dark: "min-dark" },
     defaultColor: false,
   },
 );
@@ -72,7 +72,7 @@ const features = [
   ],
   [
     "Audit trail",
-    "Record every turn, tool call, approval, and result in SQLite. Know who asked for what.",
+    "Inspect durable conversation events, approvals, schedule runs, and Pi session transcripts.",
   ],
   [
     "Files & commands",
@@ -80,15 +80,15 @@ const features = [
   ],
   [
     "Sandboxing",
-    "Run those commands in built-in just-bash, or a Docker, Gondolin, or custom sandbox.",
+    "Use host or Docker execution, or plug in Gondolin, just-bash, Vercel, Cloudflare, or a custom runtime.",
   ],
   [
     "Memory",
-    "Keep durable notes, scoped by channel, user, thread, adapter, or agent.",
+    "Store curated durable notes and retrieve them only when they are useful.",
   ],
   [
     "Skills",
-    "Let the agent build and reuse runbooks and standing instructions.",
+    "Stage runbooks, scripts, and assets that Pi can load on demand.",
   ],
   [
     "Secrets",
@@ -96,7 +96,7 @@ const features = [
   ],
   [
     "Scheduling",
-    "Run cron jobs and heartbeat check-ins against explicit channels and users.",
+    "Run code-owned cron schedules as isolated prompts or dispatch into a configured conversation.",
   ],
   [
     "File attachments",
@@ -104,7 +104,7 @@ const features = [
   ],
   [
     "Admin panel",
-    "Inspect chats, calls, approvals, memory, jobs, and config in one place.",
+    "Inspect conversations, approvals, active work, Pi sessions, schedules, and secret requests.",
   ],
   [
     "Custom tools",
@@ -116,12 +116,12 @@ const faqs = [
   {
     question: "What is heypi?",
     answer:
-      'heypi is a TypeScript framework for multiplayer chat agents: one <a href="https://pi.dev">Pi</a> agent your whole team uses in Slack, Discord, Telegram, and trusted webhook entrypoints, with approvals, audit trails, scoped runtime tools, memory, secrets, jobs, and an admin UI.',
+      'heypi is a TypeScript framework for multiplayer chat agents: one <a href="https://pi.dev">Pi</a> agent your whole team uses in Slack, Discord, Telegram, and trusted webhook entrypoints, with approvals, audit trails, scoped runtime tools, memory, secrets, schedules, and an admin UI.',
   },
   {
     question: "How do I use heypi?",
     answer:
-      "Run <code>npm create heypi@latest</code>. It scaffolds a TypeScript app, prompts for adapter, runtime, and model, writes starter agent files, and prepares environment placeholders. You can still build the same app manually with <code>createHeypi()</code>, <code>loadAgent()</code>, and an adapter.",
+      "Run <code>npm create heypi@latest -- codex-tag my-agent</code>. It copies the Codex Tag template, installs its dependencies, and gives you a working agent to configure. You can also build manually with <code>loadAgent()</code>, <code>runHeypi()</code>, and an adapter.",
   },
   {
     question: "Is heypi a workflow platform?",
@@ -131,27 +131,27 @@ const faqs = [
   {
     question: "What can I connect it to?",
     answer:
-      'The core package supports <a href="/docs/adapters/slack">Slack</a>, <a href="/docs/adapters/discord">Discord</a>, <a href="/docs/adapters/telegram">Telegram</a>, and <a href="/docs/adapters/webhook">webhooks</a>. You can also write custom adapters through the <a href="/docs/guides/integrations">integration APIs</a>.',
+      'The core package supports Slack, Discord, Telegram, local, and webhook adapters. See <a href="/docs/adapters/">adapters</a>, or write another transport with the <a href="/docs/guides/custom-adapters/">custom adapter guide</a>.',
   },
   {
     question: "Which models can I use?",
     answer:
-      'heypi delegates model calls to Pi. Configure the model in <a href="/docs/configuration/agent">agent configuration</a> and provide provider credentials, such as <code>OPENAI_API_KEY</code>, through the Node process environment.',
+      'heypi delegates model calls to Pi. Configure the model in <a href="/docs/configuration/#agent">agent configuration</a> and provide provider credentials, such as <code>OPENAI_API_KEY</code>, through the Node process environment.',
   },
   {
     question: "Do I need Docker or a VM?",
     answer:
-      'No. The default runtime is just-bash. Use <a href="/docs/configuration/runtime">Docker or Gondolin runtime providers</a> when the agent needs a real container or VM boundary, native binaries, package installs, or a workspace that behaves more like Linux.',
+      'No. Host execution is enough for many agents. Use Docker, Gondolin, Vercel, Cloudflare, or a custom <a href="/docs/guides/custom-runtimes/">runtime provider</a> when the agent needs a real container or remote execution boundary.',
   },
   {
     question: "Can agents ask before acting?",
     answer:
-      'Yes. Tool calls can require approval before they continue. heypi records who requested the action, who approved it, what ran, and how it ended. See <a href="/docs/configuration/tools">tools and confirmations</a>.',
+      'Yes. Tool calls can require approval before they continue. heypi records who requested the action, who approved it, what ran, and how it ended. See <a href="/docs/guides/custom-tools/#side-effects-and-approvals">tool approvals</a>.',
   },
   {
     question: "What does heypi store?",
     answer:
-      "Your heypi app stores data on your own server. By default, chat history, tool calls, approvals, jobs, and admin metadata are saved in SQLite. Files created or received by the agent, including attachments, memory, skills, and saved secrets, live as files in the app workspace. <code>heypi.dev</code> is only the website and docs.",
+      "Your heypi app stores its state on your own infrastructure. heypi keeps append-only conversation and audit records, schedule state, workspaces, and encrypted secret handoffs under its configured state directory, while Pi owns its session transcripts. <code>heypi.dev</code> is only the website and docs.",
   },
   {
     question: "How much does heypi cost?",
@@ -200,21 +200,23 @@ const faqs = [
           <Logo />
         </a>
         <nav class="flex items-center gap-1 text-muted-foreground">
-          <a class="btn-lg-ghost hidden sm:inline-flex" href="/">Home</a>
-          <a class="btn-lg-ghost" href="/docs">Docs</a>
+          <a class="btn hidden sm:inline-flex" data-variant="ghost" href="/">Home</a>
+          <a class="btn" data-variant="ghost" href="/docs">Docs</a>
           <a
-            class="btn-lg-ghost hidden sm:inline-flex"
+            class="btn hidden sm:inline-flex"
+            data-variant="ghost"
             href="https://github.com/hunvreus/heypi"
             target="_blank"
             rel="noopener noreferrer">GitHub</a
           >
           <a
-            class="btn-lg-ghost hidden sm:inline-flex"
+            class="btn hidden sm:inline-flex"
+            data-variant="ghost"
             href="https://heypi.dev/chat"
             target="_blank"
             rel="noopener noreferrer">Discord</a
           >
-          <a class="btn-lg-primary" href="/docs/quickstart">Quickstart</a>
+          <a class="btn" data-size="lg" href="/docs/getting-started/">Quickstart</a>
         </nav>
       </header>
 
@@ -269,12 +271,14 @@ const faqs = [
             }
           </div>
           <div class="mt-8 flex flex-wrap gap-3">
-            <a class="btn-lg" href="/docs/quickstart#step-2-fill-in-env">
+            <a class="btn" data-size="lg" href="/docs/getting-started/#create-an-agent">
               Configure agent
             </a>
             <button
               type="button"
-              class="btn-lg-outline"
+              class="btn"
+              data-variant="outline"
+              data-size="lg"
               data-copy-prompt={prompt}
             >
               <span
@@ -321,7 +325,7 @@ const faqs = [
                 runbooks it can follow on demand.
               </li>
               <li>
-                <strong class="font-medium text-foreground">jobs/</strong>:
+                <strong class="font-medium text-foreground">schedules/</strong>:
                 scheduled and recurring work.
               </li>
               <li>
@@ -351,7 +355,7 @@ const faqs = [
               ))
             }
           </div>
-          <a class="btn-lg-outline mt-8" href="/docs">Read docs →</a>
+          <a class="btn mt-8" data-variant="outline" data-size="lg" href="/docs">Read docs →</a>
         </section>
 
         <section class="border-b p-6 sm:p-16">
@@ -362,14 +366,12 @@ const faqs = [
             {
               faqs.map((faq) => (
                 <details class="group border-b last:border-b-0">
-                  <summary class="w-full rounded-md outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                    <span class="flex flex-1 items-start justify-between gap-4 py-4 text-left text-sm font-medium hover:underline">
-                      {faq.question}
-                      <span
-                        class="pointer-events-none shrink-0 translate-y-0.5 text-muted-foreground transition-transform duration-200 group-open:rotate-45 [&>svg]:size-4"
-                        set:html={plusIcon}
-                      />
-                    </span>
+                  <summary>
+                    {faq.question}
+                    <span
+                      class="text-muted-foreground transition-transform duration-200 group-open:rotate-45 [&>svg]:size-4"
+                      set:html={plusIcon}
+                    />
                   </summary>
                   <section class="pb-4">
                     <p
@@ -427,26 +429,20 @@ const faqs = [
         "Paste the prompt in your coding agent (Claude Code, Codex, etc) to start building your heypi agent.";
       const duration = 6000;
 
-      try {
-        document.dispatchEvent(
-          new CustomEvent("basecoat:toast", {
-            detail: {
-              config: {
-                category: null,
-                duration,
-                title,
-                description,
-                cancel: {
-                  label: "Ok",
-                },
-              },
-            },
-          }),
-        );
-        return;
-      } catch (_) {}
-
       const toaster = document.getElementById("toaster");
+      if (toaster && "toast" in toaster) {
+        toaster.toast({
+          category: null,
+          duration,
+          title,
+          description,
+          cancel: {
+            label: "Ok",
+          },
+        });
+        return;
+      }
+
       if (!toaster) return;
 
       const toast = document.createElement("div");
@@ -505,23 +501,6 @@ const faqs = [
         button.dataset.copyPromptInitialized = "true";
         button.addEventListener("click", () => copyLandingPrompt(button));
       });
-  </script>
-
-  <script is:inline>
-    (() => {
-      const accordions = document.querySelectorAll(".accordion");
-      accordions.forEach((accordion) => {
-        accordion.addEventListener("click", (event) => {
-          const summary = event.target.closest("summary");
-          if (!summary) return;
-          const details = summary.closest("details");
-          if (!details) return;
-          accordion.querySelectorAll("details").forEach((detailsEl) => {
-            if (detailsEl !== details) detailsEl.removeAttribute("open");
-          });
-        });
-      });
-    })();
   </script>
 
   <style>

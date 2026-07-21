@@ -1,86 +1,29 @@
 # Secrets
 
-Secret requests let the agent ask for credentials without putting plaintext secrets in chat or model context.
+The `chat_request_secret` tool collects a credential from the active user without exposing the raw
+value to the model or chat transcript.
 
-## Config
+## Flow
 
-```ts
-createHeypi({
-  state: { root: "./state" },
-  // ...adapters, agent, runtime
-  secrets: true,
-});
-```
+1. heypi creates a pending request and public key.
+2. The user opens the local admin secret page or hosted static secret page.
+3. The browser encrypts the value before submission.
+4. heypi decrypts it in the trusted process and stores it encrypted at rest under `.heypi`.
 
-## Options
+The encrypted reply can be submitted to `/admin/secret` or pasted into chat as
+`!secret:<id>:<payload>`. Secret replies are intercepted before Pi sees them. The raw secret is not
+written into `/workspace` and is not returned in the tool result.
 
-| Option | Required | Default | Description |
-| --- | --- | --- | --- |
-| `enabled` | No | `false` | Enables the `secret_request` managed tool. |
-| `url` | No | `https://heypi.dev/secret` | Public page URL sent to users. |
-| `serve` | No | `false` | Serves the static secret page from this heypi app. |
-| `expiresInMs` | No | `600_000` | Pending request lifetime. |
-| `maxFields` | No | `8` | Maximum fields per request. |
+The state root contains both encrypted values and `secrets.key`. Protect and back up that key with
+the state it decrypts. Filesystem permissions and host access remain the operator's responsibility.
 
-When enabled, heypi exposes `secret_request`. The agent passes a reason and one or more fields:
+## Using collected credentials
 
-```ts
-{
-  reason: "Need a GitHub token to inspect private workflow logs.",
-  fields: [
-    { name: "GITHUB_TOKEN", label: "GitHub token" },
-    { name: "GITHUB_OWNER" },
-  ],
-}
-```
+Secret collection and credential use are separate concerns. Model-driven runtime commands do not
+receive collected secrets automatically. Expose credentials only through trusted-side tools,
+connections, or a runtime-specific credential broker.
 
-heypi returns a browser link. The user opens it, enters the values, encrypts them locally, and pastes the `heypi-secret:...` blob back into the same chat scope. heypi decrypts locally and writes the values into the active runtime workspace:
+Runtime `env` is model-visible and can be printed by Bash. Do not treat it as a secret store.
 
-```text
-.secrets/GITHUB_TOKEN
-.secrets/GITHUB_OWNER
-```
-
-The encrypted blob is intercepted before the normal model turn, so it is not stored as chat history and is not sent to the model.
-
-Pending requests are process-local. If the heypi process restarts before the user replies, the link is invalid and the agent must request a fresh secret link.
-
-Saved values are runtime files, not database rows, memory entries, or workspace records. Their durability follows the configured runtime workspace and deployment backup strategy.
-
-## Self-hosting
-
-The default page URL is:
-
-```text
-https://heypi.dev/secret
-```
-
-That page is static client-side code. It receives the public key and request metadata in the URL fragment, encrypts locally with WebCrypto, and does not need server-side access to your heypi instance. It uses generated Basecoat CSS and no JavaScript UI widgets.
-
-To self-host the page from your own heypi app:
-
-```ts
-createHeypi({
-  state: { root: "./state" },
-  // ...adapters, agent, runtime
-  http: { host: "0.0.0.0", port: 3000 },
-  secrets: {
-    url: "https://203-0-113-10.sslip.io/secret",
-    serve: true,
-  },
-});
-```
-
-`secrets.url` is the public URL placed in chat. With `serve: true`, heypi serves the static page at that URL's path. It also serves the stylesheet at `<path>.css`. Use HTTPS for real secrets.
-
-Self-hosted secret pages need a stable URL. Avoid `http.port: 0` for self-hosted secrets unless another layer provides a stable public URL and forwards to the selected local port. For local development, either use a fixed local port that matches `secrets.url`, or omit `serve` and use the hosted page.
-
-## Security model
-
-- The private key stays in the heypi process memory and expires with the request.
-- Secret values are stored as scoped runtime files, not memory.
-- Anyone who can read the scoped runtime workspace can read saved secrets.
-- Pending secret requests are lost on process restart.
-- Field `name` is the stable file/env-style key; `label` is optional display text.
-
-Use narrow runtime scope and runtime isolation for sensitive credentials.
+For a remote secret page, configure a trusted HTTPS page that performs the same browser-side
+encryption. Never ask users to paste plaintext credentials into Slack, Discord, or Telegram.

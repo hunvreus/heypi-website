@@ -1,100 +1,47 @@
 # Attachments
 
-Attachments let the agent receive user files and send generated runtime files back to chat.
-
-## Config
-
-```ts
-createHeypi({
-  attachments: {
-    maxBytes: 25_000_000,
-    process: { documents: true },
-  },
-  // ...state, adapters, agent, runtime
-});
-```
-
-## Options
-
-| Option | Required | Default | Description |
-| --- | --- | --- | --- |
-| `store` | No | Runtime-backed store | Custom `AttachmentStore`. |
-| `maxBytes` | No | `25_000_000` | Maximum inbound or outbound attachment size. |
-| `process.documents` | No | Off | Convert supported document attachments to text for the model. |
+Slack, Discord, and Telegram can materialize inbound files into the active conversation workspace
+and upload generated files in replies.
 
 ## Inbound files
 
-Supported adapters save delivered files into the runtime workspace under the active scope. Images can be passed to the model as image inputs. Text-like files are inlined. Unsupported binaries are stored but not passed to the model.
+Files are downloaded before Pi receives the message and stored under:
 
-Provider support differs. See [Adapters](../adapters/index.md).
+```text
+/workspace/attachments/{messageId}/...
+```
 
-## Document conversion
+Pi receives the managed runtime path rather than a temporary platform URL. A failed attachment batch
+removes partial files and fails the message before model execution.
 
-Enable document conversion when the model should inspect PDFs, Office files, or similar documents.
+Configure limits per adapter:
 
 ```ts
-createHeypi({
-  attachments: {
-    process: {
-      documents: {
-        timeoutMs: 15_000,
-        maxOutputBytes: 1_000_000,
-      },
-    },
-  },
-  // ...state, adapters, agent, runtime
+slack({
+	token,
+	appToken,
+	attachments: {
+		maxBytes: 20 * 1024 * 1024,
+		timeoutMs: 30_000,
+		mimeTypes: ["image/*", "application/pdf", "text/plain"],
+		retry: { attempts: 3 },
+	},
 });
 ```
 
-The default converter, `heypi-convert-document`, uses [Microsoft MarkItDown](https://github.com/microsoft/markitdown) to convert supported files to Markdown.
-The built-in setup path pins MarkItDown to `0.1.6`; set `HEYPI_CONVERT_MARKITDOWN_PACKAGE` if you need to test or operate a different version.
-
-Requirements:
-
-- Python 3.
-- `uv`, or MarkItDown installed in the current Python environment.
-
-With `uv`, the converter can run MarkItDown on demand:
-
-```bash
-npx heypi-convert-document --setup
-```
-
-Without `uv`, install MarkItDown yourself:
-
-```bash
-python3 -m pip install "markitdown[pdf,docx,pptx,xlsx]==0.1.6"
-```
-
-Default converted extensions are `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.xls`, `.xlsx`, and `.epub`.
-
-Converter options:
-
-| Option | Required | Default | Description |
-| --- | --- | --- | --- |
-| `command` | No | `HEYPI_DOCUMENT_CONVERTER` or `heypi-convert-document` | Converter executable. |
-| `args` | No | `[]` | Extra args before the file path. |
-| `env` | No | `{ PATH }` | Environment passed to the converter. |
-| `timeoutMs` | No | `15_000` | Conversion timeout. |
-| `maxBytes` | No | No attachment-specific cap | Maximum input size for conversion. |
-| `maxOutputBytes` | No | `1_000_000` | Maximum Markdown output size. |
-| `extensions` | No | Built-in document extensions | File extensions to convert. |
-| `mimeTypes` | No | `[]` | Extra MIME types to convert. |
+Built-in adapters restrict downloads to platform file hosts. Setting `hosts` replaces that
+allowlist, including redirect destinations. Keep the list narrow.
 
 ## Outbound files
 
-The `attach` core tool marks a runtime file for upload with the final reply. Files must stay inside the active runtime scope.
+Pi sends generated files through `chat_attach`:
 
-```ts
-loadAgent("./agent", {
-  builtinTools: defaultTools({ attach: true }),
-});
+```text
+chat_attach({ paths: ["reports/summary.pdf"], text: "Report ready." })
 ```
 
-## Scope
+Paths must remain under `/workspace` or `/shared`. Built-in chat adapters upload local files when
+their APIs support it; other adapters return path or link references in text.
 
-Attachments are scoped to the active runtime workspace. Files from another scope are rejected, including outbound files queued with the `attach` tool.
-
-## Custom stores
-
-The default store is runtime-backed. Use a custom `AttachmentStore` when files need to live outside the runtime workspace, usually for multi-instance deployments.
+Remote runtimes synchronize generated files back before attachment delivery. Custom runtimes must
+provide equivalent consistency if shell commands can create files outside the runtime file API.
